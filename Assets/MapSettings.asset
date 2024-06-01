@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d283990ffdf7c4bafc75853fd2ae74, type: 3}
+  m_Name: MapSettings
+  m_EditorClassIdentifier: 
+  seed: 0
+  noiseScale: 2
+  octaves: 2
+  persistance: 0.606
+  lacunarity: 2.25
+  offset: {x: 0, y: 0}
+  showFalloffOnly: 0
+  fallOffA: 2
+  fallOffB: 2
+  mapScale: 1
+  mapSize: 40
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0.40784317, g: 0.69803923, b: 0.16078432, a: 1}
+    key1: {r: 1, g: 0.7019608, b: 0, a: 1}
+    key2: {r: 0.72156864, g: 0.8470589, b: 0.8196079, a: 0}
+    key3: {r: 0.81568635, g: 0.5019608, b: 0.34509805, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 16384
+    ctime1: 32768
+    ctime2: 49151
+    ctime3: 65535
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 1
+    m_ColorSpace: 0
+    m_NumColorKeys: 4
+    m_NumAlphaKeys: 2
+  tileHeights:
+  - name: 
+    maxHeight: 0
+    minHeight: 0
+    colorCode: {r: 0.9215687, g: 0.5411765, b: 0.023529414, a: 0}
+    tileBase: {fileID: 11400000, guid: 865215ff267b3f4478bd63462040811c, type: 2}
+  - name: 
+    maxHeight: 0
+    minHeight: 0
+    colorCode: {r: 0.81568635, g: 0.5019608, b: 0.34509805, a: 0}
+    tileBase: {fileID: 11400000, guid: 3bc1ee74301970a43abea7dec1de3b59, type: 2}
+  - name: 
+    maxHeight: 0
+    minHeight: 0
+    colorCode: {r: 0.40784317, g: 0.69803923, b: 0.16078432, a: 0}
+    tileBase: {fileID: 11400000, guid: fe16e10d645177846bc6ade53be4d549, type: 2}
+  - name: 
+    maxHeight: 0
+    minHeight: 0
+    colorCode: {r: 0.72156864, g: 0.8470589, b: 0.8196079, a: 0}
+    tileBase: {fileID: 11400000, guid: e387ae10fd6bcbf4b871f2636d9fc7e3, type: 2}
