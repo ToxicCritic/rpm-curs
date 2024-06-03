@@ -1,26 +1,34 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class RaceSelector : MonoBehaviour
 {
-    private Dropdown raceDropdown;
-    private Button startGameButton;
-
-    void Start()
+    public void SelectOrc()
     {
-        // Находим объекты по их именам в иерархии
-        raceDropdown = GameObject.Find("RaceDropdown").GetComponent<Dropdown>();
-        startGameButton = GameObject.Find("StartGameButton").GetComponent<Button>();
-
-        // Привязываем метод OnStartGame к кнопке
-        startGameButton.onClick.AddListener(OnStartGame);
+        PlayerPrefs.SetInt("SelectedRace", 0);
+        LoadGameScene();
     }
 
-    void OnStartGame()
+    public void SelectElf()
     {
-        int selectedRace = raceDropdown.value;
-        PlayerPrefs.SetInt("SelectedRace", selectedRace);
-        SceneManager.LoadScene("MainScene");
+        PlayerPrefs.SetInt("SelectedRace", 1);
+        LoadGameScene();
+    }
+
+    public void SelectHuman()
+    {
+        PlayerPrefs.SetInt("SelectedRace", 2);
+        LoadGameScene();
+    }
+
+    public void SelectUndead()
+    {
+        PlayerPrefs.SetInt("SelectedRace", 3);
+        LoadGameScene();
+    }
+
+    private void LoadGameScene()
+    {
+        SceneManager.LoadScene("GameScene");
     }
 }

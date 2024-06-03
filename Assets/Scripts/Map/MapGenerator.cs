@@ -2,83 +2,159 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public GameObject[] orcTiles;    // Префабы для биома орков
-    public GameObject[] elfTiles;    // Префабы для биома эльфов
-    public GameObject[] humanTiles;  // Префабы для биома людей
-    public GameObject[] undeadTiles; // Префабы для биома нежити
+    public GameObject[] orcTiles;
+    public GameObject[] elfTiles;
+    public GameObject[] humanTiles;
+    public GameObject[] undeadTiles;
 
-    public GameObject[] orcTrees;    // Префабы деревьев для биома орков
-    public GameObject[] elfTrees;    // Префабы деревьев для биома эльфов
-    public GameObject[] humanTrees;  // Префабы деревьев для биома людей
-    public GameObject[] undeadTrees; // Префабы деревьев для биома нежити
+    public GameObject orcTree;
+    public GameObject elfTree;
+    public GameObject humanTree;
+    public GameObject undeadTree;
 
-    public GameObject[] orcRocks;    // Префабы камней для биома орков
-    public GameObject[] elfRocks;    // Префабы камней для биома эльфов
-    public GameObject[] humanRocks;  // Префабы камней для биома людей
-    public GameObject[] undeadRocks; // Префабы камней для биома нежити
+    public GameObject orcRock;
+    public GameObject elfRock;
+    public GameObject humanRock;
+    public GameObject undeadRock;
 
-    public int mapWidth = 20;
-    public int mapHeight = 20;
-    public float treeProbability = 0.05f;  // Вероятность появления дерева на тайле
-    public float rockProbability = 0.05f;  // Вероятность появления камня на тайле
+    public GameObject orcFortressPrefab;
+    public GameObject elfFortressPrefab;
+    public GameObject humanFortressPrefab;
+    public GameObject undeadFortressPrefab;
 
-    private Transform[,] gridObjects; // Массив для хранения объектов на сетке
+    public int mapWidth = 30;
+    public int mapHeight = 30;
+    public float treeProbability = 0.05f;
+    public float rockProbability = 0.05f;
+
+    private GameObject[,] gridObjects;
 
     void Start()
     {
-        gridObjects = new Transform[mapWidth, mapHeight];
+        gridObjects = new GameObject[mapWidth, mapHeight];
         GenerateMap();
+        SpawnFortresses();
+        SpawnResources();
     }
 
-    void GenerateMap()
+    public void GenerateMap()
     {
         int halfWidth = mapWidth / 2;
         int halfHeight = mapHeight / 2;
 
-        // Заполнение каждого квадранта
-        FillQuadrant(0, halfWidth, 0, halfHeight, orcTiles, orcTrees, orcRocks);
-        FillQuadrant(halfWidth, mapWidth, 0, halfHeight, elfTiles, elfTrees, elfRocks);
-        FillQuadrant(0, halfWidth, halfHeight, mapHeight, humanTiles, humanTrees, humanRocks);
-        FillQuadrant(halfWidth, mapWidth, halfHeight, mapHeight, undeadTiles, undeadTrees, undeadRocks);
+        FillQuadrant(0, halfWidth, 0, halfHeight, orcTiles);
+        FillQuadrant(halfWidth, mapWidth, 0, halfHeight, elfTiles);
+        FillQuadrant(0, halfWidth, halfHeight, mapHeight, humanTiles);
+        FillQuadrant(halfWidth, mapWidth, halfHeight, mapHeight, undeadTiles);
     }
 
-    void FillQuadrant(int startX, int endX, int startY, int endY, GameObject[] tilePrefabs, GameObject[] treePrefabs, GameObject[] rockPrefabs)
+    void FillQuadrant(int startX, int endX, int startY, int endY, GameObject[] tilePrefabs)
     {
         for (int x = startX; x < endX; x++)
         {
             for (int y = startY; y < endY; y++)
             {
-                Vector3 position = new Vector3(x, y, 0);
+                Vector3 position = new Vector3(x + 0.5f, y + 0.5f, 0);
                 GameObject tile = Instantiate(GetRandomTile(tilePrefabs), position, Quaternion.identity);
                 tile.transform.parent = this.transform;
+                gridObjects[x, y] = tile;
+            }
+        }
+    }
 
-                // Сохранение объекта в сетке
-                gridObjects[x, y] = tile.transform;
+    void SpawnFortresses()
+    {
+        Vector3[] positions = new Vector3[]
+        {
+            new Vector3(1.5f, 1.5f, -0.1f),
+            new Vector3(1.5f, mapHeight - 2.5f, -0.1f),
+            new Vector3(mapWidth - 2.5f, 1.5f, -0.1f),
+            new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.1f)
+        };
 
-                // Добавление дерева с проверкой на вероятность и отсутствие других объектов
-                if (Random.value < treeProbability && !HasObject(x, y))
+        for (int i = 0; i < 4; i++)
+        {
+            int race = PlayerPrefs.GetInt($"Player{i}Race", i);
+            GameObject fortressPrefab = GetFortressPrefab(race);
+            GameObject fortress = Instantiate(fortressPrefab, positions[i], Quaternion.identity);
+            fortress.name = $"Player{i}Fortress";
+            fortress.transform.parent = this.transform;
+            MarkOccupied(fortress);
+        }
+    }
+
+    GameObject GetFortressPrefab(int raceIndex)
+    {
+        switch (raceIndex)
+        {
+            case 0: return orcFortressPrefab;
+            case 1: return humanFortressPrefab;
+            case 2: return elfFortressPrefab;
+            case 3: return undeadFortressPrefab;
+            default: return null;
+        }
+    }
+
+    void MarkOccupied(GameObject fortress)
+    {
+        foreach (Transform child in fortress.transform)
+        {
+            Vector3Int gridPosition = Vector3Int.FloorToInt(child.position - new Vector3(0.5f, 0.5f, 0));
+            if (IsValidGridPosition(gridPosition))
+            {
+                gridObjects[gridPosition.x, gridPosition.y] = fortress;
+            }
+        }
+    }
+
+    void SpawnResources()
+    {
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                if (gridObjects[x, y] != null && gridObjects[x, y].transform.childCount == 0)
                 {
-                    Vector3 treePosition = new Vector3(x, y, -0.1f); // Смещение по Z, чтобы дерево было над тайлом
-                    GameObject tree = Instantiate(GetRandomTile(treePrefabs), treePosition, Quaternion.identity);
-                    tree.transform.parent = tile.transform; // Делаем дерево дочерним объектом тайла
-                    gridObjects[x, y] = tree.transform; // Обновляем объект в сетке
-                }
-
-                // Добавление камня с проверкой на вероятность и отсутствие других объектов
-                if (Random.value < rockProbability && !HasObject(x, y))
-                {
-                    Vector3 rockPosition = new Vector3(x, y, -0.1f); // Смещение по Z, чтобы камень был над тайлом
-                    GameObject rock = Instantiate(GetRandomTile(rockPrefabs), rockPosition, Quaternion.identity);
-                    rock.transform.parent = tile.transform; // Делаем камень дочерним объектом тайла
-                    gridObjects[x, y] = rock.transform; // Обновляем объект в сетке
+                    Vector3 position = new Vector3(x + 0.5f, y + 0.5f, -0.1f);
+                    if (Random.value < treeProbability && !IsOccupied(x, y))
+                    {
+                        GameObject tree = Instantiate(GetTreePrefab(x, y), position, Quaternion.identity);
+                        tree.transform.parent = gridObjects[x, y].transform;
+                    }
+                    else if (Random.value < rockProbability && !IsOccupied(x, y))
+                    {
+                        GameObject rock = Instantiate(GetRockPrefab(x, y), position, Quaternion.identity);
+                        rock.transform.parent = gridObjects[x, y].transform;
+                    }
                 }
             }
         }
     }
 
-    bool HasObject(int x, int y)
+    bool IsValidGridPosition(Vector3Int position)
     {
-        return gridObjects[x, y].childCount > 0;
+        return position.x >= 0 && position.x < mapWidth && position.y >= 0 && position.y < mapHeight;
+    }
+
+    bool IsOccupied(int x, int y)
+    {
+        return gridObjects[x, y] != null && gridObjects[x, y].transform.childCount > 0;
+    }
+
+    GameObject GetTreePrefab(int x, int y)
+    {
+        if (x < mapWidth / 2 && y < mapHeight / 2) return orcTree;
+        if (x >= mapWidth / 2 && y < mapHeight / 2) return elfTree;
+        if (x < mapWidth / 2 && y >= mapHeight / 2) return humanTree;
+        return undeadTree;
+    }
+
+    GameObject GetRockPrefab(int x, int y)
+    {
+        if (x < mapWidth / 2 && y < mapHeight / 2) return orcRock;
+        if (x >= mapWidth / 2 && y < mapHeight / 2) return elfRock;
+        if (x < mapWidth / 2 && y >= mapHeight / 2) return humanRock;
+        return undeadRock;
     }
 
     GameObject GetRandomTile(GameObject[] prefabs)
