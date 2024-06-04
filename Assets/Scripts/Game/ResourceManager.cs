@@ -80,9 +80,9 @@ public class ResourceManager : MonoBehaviour
         return false;
     }
 
-    public bool CanAfford(int woodCost, int stoneCost)
+    public bool CanAfford(int woodCost, int stoneCost, int goldCost)
     {
-        return wood >= woodCost && stone >= stoneCost;
+        return wood >= woodCost && stone >= stoneCost && gold >= goldCost;
     }
 
     public bool CanAffordUnit(UnitCost cost)

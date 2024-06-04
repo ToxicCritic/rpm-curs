@@ -134,7 +134,7 @@ public class BuildingManager : MonoBehaviour
             if (CanPlaceBuilding(gridPosition) && IsWithinMapBounds(gridPosition))
             {
                 BuildingCost cost = selectedBuildingPrefab.GetComponent<BuildingCost>();
-                if (cost != null && ResourceManager.Instance.CanAfford(cost.wood, cost.stone))
+                if (cost != null && ResourceManager.Instance.CanAfford(cost.wood, cost.stone, 0))
                 {
                     bool woodSpent = ResourceManager.Instance.SpendResource("wood", cost.wood);
                     bool stoneSpent = ResourceManager.Instance.SpendResource("stone", cost.stone);

@@ -6,6 +6,12 @@ public class UnitCreation : MonoBehaviour
 
     public GameObject[] GetAvailableUnits()
     {
+        Debug.Log("GetAvailableUnits called");
+        Debug.Log($"Number of units available: {unitPrefabs.Length}");
+        foreach (var unit in unitPrefabs)
+        {
+            Debug.Log($"Available unit: {unit.name}");
+        }
         return unitPrefabs;
     }
 
@@ -13,8 +19,27 @@ public class UnitCreation : MonoBehaviour
     {
         if (unitIndex >= 0 && unitIndex < unitPrefabs.Length)
         {
-            Vector3 spawnPosition = transform.position + new Vector3(1, 0, -0.1f); // Позиция появления юнита рядом со зданием с отрицательной Z координатой
-            Instantiate(unitPrefabs[unitIndex], spawnPosition, Quaternion.identity);
+            GameObject unitPrefab = unitPrefabs[unitIndex];
+            UnitCost cost = unitPrefab.GetComponent<UnitCost>();
+
+            if (cost != null && ResourceManager.Instance.CanAfford(0, 0, cost.gold))
+            {
+                bool goldSpent = ResourceManager.Instance.SpendResource("gold", cost.gold);
+
+                if (goldSpent)
+                {
+                    Vector3 spawnPosition = new Vector3(Mathf.Floor(transform.position.x) + 0.5f, Mathf.Floor(transform.position.y) - 1f, -0.1f);
+                    Instantiate(unitPrefabs[unitIndex], spawnPosition, Quaternion.identity);
+                }
+                else
+                {
+                    Debug.Log("Not enough gold to create unit.");
+                }
+            }
+            else
+            {
+                Debug.Log("Not enough resources to create unit.");
+            }
         }
     }
 }
