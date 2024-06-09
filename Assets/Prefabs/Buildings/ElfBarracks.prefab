@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 623530679140670739}
   - component: {fileID: -1110234047455248448}
   - component: {fileID: -1800884708044185582}
-  - component: {fileID: -8564339606197869107}
+  - component: {fileID: -6006782185164600871}
   m_Layer: 6
   m_Name: ElfBarracks
   m_TagString: Building
@@ -159,7 +159,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0e0f0da583e83b429655dde9d5de7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-8564339606197869107
+  buildingType: 1
+  health: 70
+  maxHealth: 70
+  playerIndex: 4
+  fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
+  threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
+  halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  quarterHealthBarPrefab: {fileID: 3027940406558746717, guid: 80969a1473e0b244fbb31a69068a6ff4, type: 3}
+  criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}
+--- !u!114 &-6006782185164600871
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,7 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5754a48e15d16cc4db4aedd65f76a144, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitPrefabs:
+  availableUnits:
   - {fileID: 7705738996807228794, guid: bcca8d7954fd43942a508475cb061de5, type: 3}
   - {fileID: 3614510517113522392, guid: 3245be9eb8e676044ba81c8b8db2ef28, type: 3}
   - {fileID: 5968259184835139826, guid: 4256a19efe9b2784a89485bf42a25c10, type: 3}

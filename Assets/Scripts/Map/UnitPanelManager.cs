@@ -3,95 +3,97 @@ using UnityEngine.UI;
 
 public class UnitPanelManager : MonoBehaviour
 {
-    public Transform unitButtonPanel; // Панель для кнопок юнитов
-    public Button unitButtonPrefab;   // Префаб кнопки юнита
+    public Transform unitButtonPanel;
+    public Button unitButtonPrefab;
 
-    private GameObject selectedBuildingInstance; // Текущая выбранная казарма или домик сборщиков ресурсов
-    private bool isUnitPanelActive = false;      // Флаг для отслеживания текущей активной панели
+    public BuildingManager buildingManager;
 
-    public BuildingPanelManager buildingPanelManager; // Ссылка на менеджер панели построек
+    private Building selectedBuildingInstance;
+    private UnitCreation unitCreation;
 
-    public void SelectBuildingInstance(GameObject buildingInstance)
+    public void ShowUnitCreationPanel(Building building)
     {
-        selectedBuildingInstance = buildingInstance;
+        SelectBuildingInstance(building);
+        unitButtonPanel.gameObject.SetActive(true); // Показываем панель юнитов
+    }
+
+    private void SelectBuildingInstance(Building building)
+    {
+        selectedBuildingInstance = building;
+        unitCreation = building.GetComponent<UnitCreation>();
         UpdateUnitPanel();
+        buildingManager.HideBuildPanel(); // Скрываем панель построек при выборе здания для создания юнитов
     }
 
     private void UpdateUnitPanel()
     {
-        // Удаление старых кнопок юнитов
         foreach (Transform child in unitButtonPanel)
         {
             Destroy(child.gameObject);
         }
 
-        UnitCreation unitCreation = selectedBuildingInstance.GetComponent<UnitCreation>();
+        GameObject[] availableUnits = unitCreation.GetAvailableUnits();
+        float panelWidth = unitButtonPanel.GetComponent<RectTransform>().rect.width;
+        float buttonWidth = unitButtonPrefab.GetComponent<RectTransform>().rect.width;
+        float spacing = (panelWidth - (availableUnits.Length * buttonWidth)) / (availableUnits.Length + 1);
 
-        if (unitCreation != null)
+        for (int i = 0; i < availableUnits.Length; i++)
         {
-            GameObject[] availableUnits = unitCreation.GetAvailableUnits();
-            int numberOfUnits = availableUnits.Length;
-            float panelWidth = unitButtonPanel.GetComponent<RectTransform>().rect.width;
-            float buttonWidth = unitButtonPrefab.GetComponent<RectTransform>().rect.width;
-            float spacing = (panelWidth - (numberOfUnits * buttonWidth)) / (numberOfUnits + 1);
+            GameObject unit = availableUnits[i];
+            Button button = Instantiate(unitButtonPrefab, unitButtonPanel);
+            int index = i;
 
-            for (int i = 0; i < numberOfUnits; i++)
+            button.onClick.AddListener(() => CreateUnit(index));
+            Image buttonImage = button.GetComponent<Image>();
+
+            SpriteRenderer unitSpriteRenderer = unit.GetComponent<SpriteRenderer>();
+            if (unitSpriteRenderer != null)
             {
-                GameObject unit = availableUnits[i];
-                Button button = Instantiate(unitButtonPrefab, unitButtonPanel);
-                int index = i;
+                buttonImage.sprite = unitSpriteRenderer.sprite;
+            }
 
-                button.onClick.AddListener(() => unitCreation.CreateUnit(index));
-                Image buttonImage = button.GetComponent<Image>();
+            UnitCost cost = unit.GetComponent<UnitCost>();
+            PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
+            if (cost != null && !currentPlayerResourceManager.CanAfford(0, 0, cost.gold))
+            {
+                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
 
-                // Получаем спрайт из компонента SpriteRenderer префаба юнита
-                SpriteRenderer unitSpriteRenderer = unit.GetComponent<SpriteRenderer>();
-                if (unitSpriteRenderer != null)
-                {
-                    buttonImage.sprite = unitSpriteRenderer.sprite;
-                }
+            float xPos = spacing * (i + 1) + buttonWidth * i;
+            button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
+        }
+    }
 
-                // Подсвечиваем недоступные юниты темным цветом
-                UnitCost cost = unit.GetComponent<UnitCost>();
-                if (cost != null && !ResourceManager.Instance.CanAffordUnit(cost))
-                {
-                    buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); // Темный цвет
-                }
+    private void CreateUnit(int index)
+    {
+        PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
+        GameObject unitPrefab = unitCreation.GetAvailableUnits()[index];
+        UnitCost cost = unitPrefab.GetComponent<UnitCost>();
 
-                // Располагаем кнопки по центру панели с равномерными отступами
-                RectTransform buttonRect = button.GetComponent<RectTransform>();
-                float xPos = spacing * (i + 1) + buttonWidth * i;
-                buttonRect.anchoredPosition = new Vector2(xPos, 0);
-                buttonRect.localScale = Vector3.one; // Убедимся, что кнопка масштабируется правильно
+        if (cost != null && currentPlayerResourceManager.CanAfford(0, 0, cost.gold))
+        {
+            bool goldSpent = currentPlayerResourceManager.SpendResource("gold", cost.gold);
 
-                Debug.Log($"Button for unit {i} created at position {xPos}"); // Отладочное сообщение
+            if (goldSpent)
+            {
+                unitCreation.CreateUnit(index, selectedBuildingInstance.gameObject); // Передаем buildingInstance при создании юнита
+                selectedBuildingInstance.ProduceUnit(); // Устанавливаем флаг производства юнита
+                unitButtonPanel.gameObject.SetActive(false); // Скрываем панель юнитов после создания юнита
+                buildingManager.ShowBuildPanel(); // Вернуться на панель построек после создания юнита
             }
         }
         else
         {
-            Debug.LogWarning("UnitCreation component not found on selected building instance.");
+            Debug.Log("Not enough resources to create unit.");
         }
-
-        unitButtonPanel.gameObject.SetActive(true);
-        buildingPanelManager.HideBuildPanel();
-        isUnitPanelActive = true;
     }
 
-    private void Update()
+    void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isUnitPanelActive)
-            {
-                ShowBuildPanel();
-            }
+            unitButtonPanel.gameObject.SetActive(false); // Скрываем панель юнитов при нажатии Esc
+            buildingManager.ShowBuildPanel(); // Вернуться на панель построек при нажатии Esc
         }
-    }
-
-    private void ShowBuildPanel()
-    {
-        unitButtonPanel.gameObject.SetActive(false);
-        buildingPanelManager.ShowBuildPanel();
-        isUnitPanelActive = false;
     }
 }

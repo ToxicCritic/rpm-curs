@@ -62,6 +62,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 5604a748dae05744f875b43bb1d4d07f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2732888884597585733}
+    - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 5604a748dae05744f875b43bb1d4d07f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 238278513608806731}
   m_SourcePrefab: {fileID: -8435245712485981826, guid: 5604a748dae05744f875b43bb1d4d07f, type: 3}
 --- !u!1 &173772155945374427 stripped
 GameObject:
@@ -126,3 +129,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gold: 7
+--- !u!114 &238278513608806731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173772155945374427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f7d4b044613e9e4982f73f496d3460c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerIndex: 2
+  health: 40
+  maxHealth: 40
+  attackPower: 40
+  attackRange: 2
+  moveRange: 4
+  hasMoved: 0
+  hasAttacked: 0
+  fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
+  threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
+  halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  quarterHealthBarPrefab: {fileID: 3027940406558746717, guid: 80969a1473e0b244fbb31a69068a6ff4, type: 3}
+  oneEighthHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}

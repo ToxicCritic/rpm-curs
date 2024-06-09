@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8134728429560811798}
   - component: {fileID: 1189882653348644361}
   - component: {fileID: -2613155955008483915}
+  - component: {fileID: -5464297977143766196}
   m_Layer: 6
   m_Name: UndeadMine
   m_TagString: Building
@@ -145,3 +146,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wood: 20
   stone: 10
+--- !u!114 &-5464297977143766196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4649503707169383935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0e0f0da583e83b429655dde9d5de7b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingType: 2
+  health: 60
+  maxHealth: 60
+  playerIndex: 3
+  fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
+  threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
+  halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  quarterHealthBarPrefab: {fileID: 3027940406558746717, guid: 80969a1473e0b244fbb31a69068a6ff4, type: 3}
+  criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}

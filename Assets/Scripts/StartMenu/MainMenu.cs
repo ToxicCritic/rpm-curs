@@ -7,7 +7,7 @@ public class MainMenu : MonoBehaviour
     {
         // —брасываем сохраненный прогресс (если есть)
         PlayerPrefs.DeleteAll();
-        SceneManager.LoadScene("RaceSelector");
+        SceneManager.LoadScene("GameScene");
     }
 
     public void ContinueGame()

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 760058563504567916}
   - component: {fileID: 5931296082920146307}
   - component: {fileID: -8135134902217749654}
+  - component: {fileID: 6443199666853849231}
   m_Layer: 6
   m_Name: ElfSpecial
   m_TagString: Building
@@ -145,3 +146,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wood: 25
   stone: 25
+--- !u!114 &6443199666853849231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6659157857738828805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0e0f0da583e83b429655dde9d5de7b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingType: 3
+  health: 100
+  maxHealth: 100
+  playerIndex: 4
+  fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
+  threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
+  halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  quarterHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}

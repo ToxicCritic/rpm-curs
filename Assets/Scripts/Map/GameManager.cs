@@ -8,6 +8,5 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         int selectedRace = PlayerPrefs.GetInt("SelectedRace", 0);
-        buildingPanelManager.SetRace(selectedRace);
     }
 }

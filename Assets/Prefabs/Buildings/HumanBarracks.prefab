@@ -159,6 +159,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0e0f0da583e83b429655dde9d5de7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buildingType: 1
+  health: 70
+  maxHealth: 70
+  playerIndex: 2
+  fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
+  threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
+  halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
+  quarterHealthBarPrefab: {fileID: 3027940406558746717, guid: 80969a1473e0b244fbb31a69068a6ff4, type: 3}
+  criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}
 --- !u!114 &-7253194270457454054
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5754a48e15d16cc4db4aedd65f76a144, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitPrefabs:
+  availableUnits:
   - {fileID: 8518699357896165842, guid: eb530395dbbb4e1479bb192660d88ab1, type: 3}
   - {fileID: 173772155945374427, guid: 2df61723797f24a4dac1b3d390f08be1, type: 3}
   - {fileID: 6597258580877117231, guid: bf12523a5e53e7647a7d178492876f27, type: 3}

@@ -1,75 +1,91 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
 
 public class TurnManager : MonoBehaviour
 {
-    public List<Unit>[] playerUnits = new List<Unit>[4];
-    private int currentPlayerIndex;
-    private int currentUnitIndex;
+    public static TurnManager Instance { get; private set; }
 
-    public Text currentPlayerText;
+    public List<UnitManager> unitManagers;
+    public List<PlayerResourceManager> playerResourceManagers;
+    public BuildingManager buildingManager;
+    public Button endTurnButton;
+    public TMP_Text turnText;
+    private int currentTurnIndex = 1; // Начинаем с 1
+    private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
-        for (int i = 0; i < 4; i++)
+        if (unitManagers.Count != 4 || playerResourceManagers.Count != 4)
         {
-            playerUnits[i] = new List<Unit>();
+            Debug.LogError("UnitManagers and PlayerResourceManagers count should be equal to 4.");
         }
 
-        currentPlayerIndex = 0;
-        currentUnitIndex = 0;
         StartTurn();
+        endTurnButton.onClick.AddListener(EndTurn);
     }
 
     void StartTurn()
     {
-        UpdateCurrentPlayerText();
-        if (playerUnits[currentPlayerIndex].Count > 0)
-        {
-            playerUnits[currentPlayerIndex][currentUnitIndex].StartTurn();
-        }
+        Debug.Log($"Starting turn for player {currentTurnIndex}");
+        unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex - 1); // Индексация с 1
+        buildingManager.SetPlayer(currentTurnIndex); // Обновление доступных зданий для текущего игрока
+        buildingManager.StartTurn(); // Сброс состояния зданий
+        playerResourceManagers[currentTurnIndex - 1].StartTurn(); // Обновление ресурсов для текущего игрока
+        UpdateTurnText();
     }
 
-    void EndTurn()
+    public void EndTurn()
     {
-        if (playerUnits[currentPlayerIndex].Count > 0)
-        {
-            playerUnits[currentPlayerIndex][currentUnitIndex].EndTurn();
-            currentUnitIndex++;
-
-            if (currentUnitIndex >= playerUnits[currentPlayerIndex].Count)
-            {
-                currentUnitIndex = 0;
-                currentPlayerIndex++;
-                if (currentPlayerIndex >= playerUnits.Length)
-                {
-                    currentPlayerIndex = 0;
-                }
-            }
-        }
-        else
-        {
-            currentPlayerIndex++;
-            if (currentPlayerIndex >= playerUnits.Length)
-            {
-                currentPlayerIndex = 0;
-            }
-        }
-
+        Debug.Log($"Ending turn for player {currentTurnIndex}");
+        unitManagers[currentTurnIndex - 1].EndTurn();
+        playerResourceManagers[currentTurnIndex - 1].EndTurn(); // Завершение хода для текущего игрока
+        currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1; // Переключение между всеми игроками
+        Debug.Log($"Next turn index: {currentTurnIndex}");
         StartTurn();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             EndTurn();
         }
     }
 
-    void UpdateCurrentPlayerText()
+    void UpdateTurnText()
     {
-        currentPlayerText.text = $"Player {currentPlayerIndex + 1}'s Turn";
+        if (currentTurnIndex > 0 && currentTurnIndex <= playerNames.Length)
+        {
+            turnText.text = $"Ход: {playerNames[currentTurnIndex - 1]}";
+            Debug.Log($"Updated turn text: {turnText.text}");
+        }
+        else
+        {
+            Debug.LogError($"Invalid turn index: {currentTurnIndex}");
+        }
+    }
+
+    public PlayerResourceManager GetCurrentPlayerResourceManager()
+    {
+        return playerResourceManagers[currentTurnIndex - 1];
+    }
+
+    public int GetCurrentPlayerIndex()
+    {
+        return currentTurnIndex;
     }
 }
