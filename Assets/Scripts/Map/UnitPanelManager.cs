@@ -21,8 +21,11 @@ public class UnitPanelManager : MonoBehaviour
     {
         selectedBuildingInstance = building;
         unitCreation = building.GetComponent<UnitCreation>();
-        UpdateUnitPanel();
-        buildingManager.HideBuildPanel(); // Скрываем панель построек при выборе здания для создания юнитов
+        if (building.buildingType == Building.BuildingType.Barracks || building.buildingType == Building.BuildingType.ResourceGatherer)
+        {
+            UpdateUnitPanel();
+            buildingManager.HideBuildPanel(); // Скрываем панель построек при выборе здания для создания юнитов
+        }
     }
 
     private void UpdateUnitPanel()

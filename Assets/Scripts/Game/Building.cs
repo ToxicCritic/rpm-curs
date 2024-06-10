@@ -36,7 +36,7 @@ public class Building : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (TurnManager.Instance.GetCurrentPlayerIndex() == playerIndex)
+        if (TurnManager.Instance.GetCurrentPlayerIndex() == playerIndex && (this.buildingType == BuildingType.Barracks || this.buildingType == BuildingType.ResourceGatherer))
         {
             buildingManager.ShowUnitCreationPanel(this);
         }

@@ -170,3 +170,4 @@ MonoBehaviour:
   criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}
   attackRange: 4
   attackPower: 15
+  attackRangeIndicatorPrefab: {fileID: 4449287128107081882, guid: 078e8448c74178d41baee221c26c6696, type: 3}

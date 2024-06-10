@@ -14,6 +14,7 @@ public class UnitManager : MonoBehaviour
 
     private bool isTurnActive = false;
     public Unit SelectedUnit { get; private set; }
+    private Tower selectedTower;
 
     void Start()
     {
@@ -64,17 +65,25 @@ public class UnitManager : MonoBehaviour
                 {
                     SelectedUnit.SetTarget(hitUnit.transform);
                     SelectedUnit.Attack();
-                    DeselectUnit();
                 }
             }
-            else if (hitCollider != null && hitCollider.GetComponent<Building>() != null)
+            else if (hitCollider != null)
             {
-                Building hitBuilding = hitCollider.GetComponent<Building>();
-                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5f)
+                if (hitCollider.GetComponent<Tower>() != null)
                 {
-                    SelectedUnit.SetTarget(hitBuilding.transform);
-                    SelectedUnit.Attack();
-                    DeselectUnit();
+                    Tower tower = hitCollider.GetComponent<Tower>(); 
+                    SelectTower(tower);
+                    return;
+                }
+                else if (hitCollider.GetComponent<Building>() != null)
+                {
+                    Building hitBuilding = hitCollider.GetComponent<Building>();
+                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5f)
+                    {
+                        SelectedUnit.SetTarget(hitBuilding.transform);
+                        SelectedUnit.Attack();
+                        DeselectUnit();
+                    }
                 }
             }
             else if (SelectedUnit != null)
@@ -95,6 +104,28 @@ public class UnitManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             DeselectUnit();
+            DeselectTower(); // Добавлено снятие выделения с башни
+        }
+    }
+
+    private void SelectTower(Tower tower)
+    {
+        DeselectUnit();
+        if (selectedTower != null)
+        {
+            selectedTower.ClearAttackRangeIndicators();
+        }
+
+        selectedTower = tower;
+        selectedTower.ShowAttackRange();
+    }
+
+    private void DeselectTower()
+    {
+        if (selectedTower != null)
+        {
+            selectedTower.ClearAttackRangeIndicators();
+            selectedTower = null;
         }
     }
 
@@ -141,7 +172,7 @@ public class UnitManager : MonoBehaviour
         {
             for (int y = -moveRange; y <= moveRange; y++)
             {
-                if (Mathf.Abs(x) + Mathf.Abs(y) <= moveRange + 2)
+                if (Mathf.Sqrt(x * x + y * y) <= moveRange + 1)
                 {
                     Vector3 indicatorPosition = new Vector3(unitPosition.x + x, unitPosition.y + y + 0.5f, moveZPosition);
                     GameObject indicator = Instantiate(moveRangeIndicatorPrefab, indicatorPosition, Quaternion.identity);
@@ -163,7 +194,7 @@ public class UnitManager : MonoBehaviour
         {
             for (int y = Mathf.CeilToInt(-attackRange); y <= Mathf.FloorToInt(attackRange); y++)
             {
-                if (Mathf.Sqrt(x * x + y * y) <= attackRange + 2)
+                if (Mathf.Sqrt(x * x + y * y) <= attackRange + 0.5f)
                 {
                     Vector3 indicatorPosition = new Vector3(unitPosition.x + x, unitPosition.y + y + 0.5f, attackZPosition);
                     GameObject indicator = Instantiate(attackRangeIndicatorPrefab, indicatorPosition, Quaternion.identity);
