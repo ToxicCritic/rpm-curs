@@ -253,6 +253,41 @@ public class BuildingManager : MonoBehaviour
         if (building.buildingType == Building.BuildingType.Fortress)
         {
             TurnManager.Instance.DeactivatePlayer(building.playerIndex);
+            DestroyPlayerBuildingsAndUnits(building.playerIndex); // ”ничтожаем здани€ и юниты игрока
+        }
+    }
+
+    public void DestroyPlayerBuildingsAndUnits(int playerIndex)
+    {
+        List<Building> buildingsToDestroy = new List<Building>();
+        foreach (var building in playerBuildings)
+        {
+            if (building.playerIndex == playerIndex)
+            {
+                buildingsToDestroy.Add(building);
+            }
+        }
+
+        foreach (var building in buildingsToDestroy)
+        {
+            playerBuildings.Remove(building);
+            Destroy(building.gameObject);
+        }
+
+        UnitManager unitManager = FindObjectOfType<UnitManager>();
+        List<Unit> unitsToDestroy = new List<Unit>();
+        foreach (var unit in unitManager.units)
+        {
+            if (unit.playerIndex == playerIndex)
+            {
+                unitsToDestroy.Add(unit);
+            }
+        }
+
+        foreach (var unit in unitsToDestroy)
+        {
+            unitManager.UnregisterUnit(unit);
+            Destroy(unit.gameObject);
         }
     }
 
