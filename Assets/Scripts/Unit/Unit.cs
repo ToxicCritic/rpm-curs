@@ -138,7 +138,6 @@ public class Unit : MonoBehaviour
                     if (targetBuilding.health <= 0)
                     {
                         Debug.Log($"{targetBuilding.gameObject.name} был уничтожен!");
-                        unitManager.UnregisterBuilding(targetBuilding);
                         Destroy(targetBuilding.gameObject);
                     }
                 }

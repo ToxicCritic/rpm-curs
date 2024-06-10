@@ -28,10 +28,13 @@ public class MapGenerator : MonoBehaviour
     public float rockProbability = 0.05f;
 
     private GameObject[,] gridObjects;
+    private BuildingManager buildingManager;
 
     void Start()
     {
         gridObjects = new GameObject[mapWidth, mapHeight];
+        buildingManager = FindObjectOfType<BuildingManager>();
+
         GenerateMap();
         SpawnFortresses();
         SpawnResources();
@@ -66,10 +69,10 @@ public class MapGenerator : MonoBehaviour
     {
         Vector3[] positions = new Vector3[]
         {
-            new Vector3(1.5f, 1.5f, -0.1f),
-            new Vector3(1.5f, mapHeight - 2.5f, -0.1f),
-            new Vector3(mapWidth - 2.5f, 1.5f, -0.1f),
-            new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.1f)
+        new Vector3(1.5f, 1.5f, -0.1f),
+        new Vector3(1.5f, mapHeight - 2.5f, -0.1f),
+        new Vector3(mapWidth - 2.5f, 1.5f, -0.1f),
+        new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.1f)
         };
 
         for (int i = 0; i < 4; i++)
@@ -79,9 +82,20 @@ public class MapGenerator : MonoBehaviour
             GameObject fortress = Instantiate(fortressPrefab, positions[i], Quaternion.identity);
             fortress.name = $"Player{i}Fortress";
             fortress.transform.parent = this.transform;
+
+            Building building = fortress.GetComponent<Building>();
+            if (building != null)
+            {
+                building.playerIndex = i + 1;
+                FindObjectOfType<BuildingManager>().RegisterBuilding(building);
+            }
+
             MarkOccupied(fortress);
         }
+
+        FindObjectOfType<BuildingManager>().Initialize(); // ”казываем завершение инициализации
     }
+
 
     GameObject GetFortressPrefab(int raceIndex)
     {

@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -12,40 +12,40 @@ public class BuildingManager : MonoBehaviour
     private GameObject[] currentBuildings;
     private GameObject selectedBuildingPrefab;
 
-    public Transform buttonPanel;          // Ссылка на панель для кнопок зданий
-    public Button buildingButtonPrefab;    // Префаб кнопки для построек
+    public Transform buttonPanel;
+    public Button buildingButtonPrefab;
 
-    public LayerMask obstacleLayerMask;    // Слой препятствий (ресурсы и здания)
+    public LayerMask obstacleLayerMask;
     public int mapWidth = 30;
     public int mapHeight = 30;
 
-    public GameObject tileHighlighterPrefab; // Префаб объекта выделения тайла
+    public GameObject tileHighlighterPrefab;
     private GameObject tileHighlighterInstance;
 
-    public GameObject alwaysOnHighlighterPrefab; // Префаб второго объекта выделения
+    public GameObject alwaysOnHighlighterPrefab;
     private GameObject alwaysOnHighlighterInstance;
 
-    private GameObject selectedBuildingInstance; // Текущая выбранная казарма или домик сборщиков ресурсов
+    private GameObject selectedBuildingInstance;
 
-    private bool isUnitPanelActive = false; // Флаг для отслеживания текущей активной панели
+    private bool isUnitPanelActive = false;
 
-    public UnitPanelManager unitPanelManager; // Ссылка на UnitPanelManager
+    public UnitPanelManager unitPanelManager;
 
-    private int currentPlayerIndex; // Индекс текущего игрока
+    private int currentPlayerIndex;
 
-    private List<Building> playerBuildings = new List<Building>();
+    public List<Building> playerBuildings = new List<Building>();
+
+    private bool isInitialized = false;
 
     void Start()
     {
-        // Создаем объекты выделения и скрываем их
         tileHighlighterInstance = Instantiate(tileHighlighterPrefab);
         tileHighlighterInstance.SetActive(false);
 
         alwaysOnHighlighterInstance = Instantiate(alwaysOnHighlighterPrefab);
-        alwaysOnHighlighterInstance.SetActive(true); // Второе выделение всегда активно
+        alwaysOnHighlighterInstance.SetActive(true);
 
-        // Инициализация текущих зданий в зависимости от выбранной расы
-        SetPlayer(1); // Начинаем с первого игрока по умолчанию
+        SetPlayer(1);
     }
 
     public void SelectBuilding(int index)
@@ -85,47 +85,42 @@ public class BuildingManager : MonoBehaviour
 
     void UpdateBuildPanel()
     {
-        // Удаление старых кнопок
         foreach (Transform child in buttonPanel)
         {
             Destroy(child.gameObject);
         }
 
-        // Создание кнопок для текущих зданий
-        if (currentBuildings != null)
+        if (currentBuildings == null) return;
+
+        int numberOfBuildings = currentBuildings.Length;
+        float panelWidth = buttonPanel.GetComponent<RectTransform>().rect.width;
+        float buttonWidth = buildingButtonPrefab.GetComponent<RectTransform>().rect.width;
+        float spacing = (panelWidth - (numberOfBuildings * buttonWidth)) / (numberOfBuildings + 1);
+
+        for (int i = 0; i < numberOfBuildings; i++)
         {
-            int numberOfBuildings = currentBuildings.Length;
-            float panelWidth = buttonPanel.GetComponent<RectTransform>().rect.width;
-            float buttonWidth = buildingButtonPrefab.GetComponent<RectTransform>().rect.width;
-            float spacing = (panelWidth - (numberOfBuildings * buttonWidth)) / (numberOfBuildings + 1);
+            GameObject building = currentBuildings[i];
+            Button button = Instantiate(buildingButtonPrefab, buttonPanel);
+            int index = i;
 
-            for (int i = 0; i < numberOfBuildings; i++)
+            button.onClick.AddListener(() => SelectBuilding(index));
+            Image buttonImage = button.GetComponent<Image>();
+
+            SpriteRenderer buildingSpriteRenderer = building.GetComponent<SpriteRenderer>();
+            if (buildingSpriteRenderer != null)
             {
-                GameObject building = currentBuildings[i];
-                Button button = Instantiate(buildingButtonPrefab, buttonPanel);
-                int index = i;
-
-                button.onClick.AddListener(() => SelectBuilding(index));
-                Image buttonImage = button.GetComponent<Image>();
-
-                // Получаем спрайт из компонента SpriteRenderer префаба здания
-                SpriteRenderer buildingSpriteRenderer = building.GetComponent<SpriteRenderer>();
-                if (buildingSpriteRenderer != null)
-                {
-                    buttonImage.sprite = buildingSpriteRenderer.sprite;
-                }
-
-                // Располагаем кнопки по центру панели с равномерными отступами
-                float xPos = spacing * (i + 1) + buttonWidth * i;
-                button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
+                buttonImage.sprite = buildingSpriteRenderer.sprite;
             }
+
+            float xPos = spacing * (i + 1) + buttonWidth * i;
+            button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
         }
     }
 
     void Update()
     {
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePosition.z = 0;  // Устанавливаем Z-координату в 0
+        mousePosition.z = 0;
         Vector3Int gridPosition = Vector3Int.FloorToInt(mousePosition);
         gridPosition.z = 0;
 
@@ -156,18 +151,11 @@ public class BuildingManager : MonoBehaviour
 
                         if (woodSpent && stoneSpent)
                         {
-                            Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f); // Отрицательная координата Z
-                            GameObject buildingInstance = Instantiate(selectedBuildingPrefab, spawnPosition, Quaternion.identity);
-                            selectedBuildingPrefab = null; // Сбрасываем выбранное здание после размещения
+                            Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
+                            Instantiate(selectedBuildingPrefab, spawnPosition, Quaternion.identity);
+                            selectedBuildingPrefab = null;
                             tileHighlighterInstance.SetActive(false);
-                            alwaysOnHighlighterInstance.SetActive(true); // Включаем постоянное выделение после размещения здания
-
-                            Building newBuilding = buildingInstance.GetComponent<Building>();
-                            if (newBuilding != null)
-                            {
-                                newBuilding.playerIndex = currentPlayerIndex;
-                                RegisterBuilding(newBuilding); // Регистрация здания
-                            }
+                            alwaysOnHighlighterInstance.SetActive(true);
                         }
                     }
                     else
@@ -182,7 +170,6 @@ public class BuildingManager : MonoBehaviour
             }
         }
 
-        // Обработка нажатия клавиши Escape
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CancelBuildingPlacement();
@@ -193,7 +180,7 @@ public class BuildingManager : MonoBehaviour
     {
         selectedBuildingPrefab = null;
         tileHighlighterInstance.SetActive(false);
-        alwaysOnHighlighterInstance.SetActive(true); // Включаем постоянное выделение при отмене строительства
+        alwaysOnHighlighterInstance.SetActive(true);
         Debug.Log("Building placement cancelled.");
     }
 
@@ -216,13 +203,13 @@ public class BuildingManager : MonoBehaviour
 
         switch (currentPlayerIndex)
         {
-            case 1: // Орки
+            case 1:
                 return position.x < halfWidth && position.y < halfHeight;
-            case 2: // Люди
+            case 2:
                 return position.x < halfWidth && position.y >= halfHeight;
-            case 3: // Нежить
+            case 3:
                 return position.x >= halfWidth && position.y >= halfHeight;
-            case 4: // Эльфы
+            case 4:
                 return position.x >= halfWidth && position.y < halfHeight;
             default:
                 return false;
@@ -236,10 +223,6 @@ public class BuildingManager : MonoBehaviour
             unitPanelManager.ShowUnitCreationPanel(building);
             HideBuildPanel();
         }
-        else
-        {
-            Debug.Log("This building has already produced a unit this turn.");
-        }
     }
 
     public void HideBuildPanel()
@@ -252,22 +235,25 @@ public class BuildingManager : MonoBehaviour
         buttonPanel.gameObject.SetActive(true);
     }
 
-    public void StartTurn()
-    {
-        foreach (var building in playerBuildings)
-        {
-            building.StartTurn();
-        }
-    }
-
     public void RegisterBuilding(Building building)
     {
-        playerBuildings.Add(building);
+        if (!playerBuildings.Contains(building))
+        {
+            playerBuildings.Add(building);
+        }
     }
 
     public void UnregisterBuilding(Building building)
     {
-        playerBuildings.Remove(building);
+        if (playerBuildings.Contains(building))
+        {
+            playerBuildings.Remove(building);
+        }
+
+        if (building.buildingType == Building.BuildingType.Fortress)
+        {
+            TurnManager.Instance.DeactivatePlayer(building.playerIndex);
+        }
     }
 
     public bool IsPlayerFortressDestroyed(int playerIndex)
@@ -280,5 +266,10 @@ public class BuildingManager : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public void Initialize()
+    {
+        isInitialized = true;
     }
 }

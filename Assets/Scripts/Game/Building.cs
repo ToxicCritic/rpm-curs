@@ -14,10 +14,7 @@ public class Building : MonoBehaviour
     public BuildingType buildingType;
     public int health;
     public int maxHealth;
-    public int playerIndex; // Индекс игрока, которому принадлежит здание
-    private bool hasProducedUnit;
-
-    private BuildingManager buildingManager;
+    public int playerIndex; // Индекс игрока
 
     public GameObject fullHealthBarPrefab;
     public GameObject threeQuarterHealthBarPrefab;
@@ -27,16 +24,33 @@ public class Building : MonoBehaviour
 
     private GameObject healthBarInstance;
 
+    private BuildingManager buildingManager;
+
+    private bool hasProducedUnit; // Добавляем переменную для отслеживания производства юнитов
+
     void Start()
     {
         buildingManager = FindObjectOfType<BuildingManager>();
-        buildingManager.RegisterBuilding(this);
+        if (buildingManager != null)
+        {
+            buildingManager.RegisterBuilding(this);
+        }
+
+        // Создаем полоску здоровья
         UpdateHealthBar();
+    }
+
+    void OnDestroy()
+    {
+        if (buildingManager != null)
+        {
+            buildingManager.UnregisterBuilding(this);
+        }
     }
 
     void OnMouseDown()
     {
-        if (playerIndex == TurnManager.Instance.GetCurrentPlayerIndex())
+        if (buildingManager != null && buildingType != BuildingType.Fortress)
         {
             buildingManager.ShowUnitCreationPanel(this);
         }
@@ -45,20 +59,23 @@ public class Building : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
-        UpdateHealthBar();
         if (health <= 0)
         {
             Die();
+        }
+        else
+        {
+            UpdateHealthBar();
         }
     }
 
     public void Die()
     {
-        buildingManager.UnregisterBuilding(this);
+        // Реализация логики разрушения здания
         Destroy(gameObject);
     }
 
-    public void UpdateHealthBar()
+    void UpdateHealthBar()
     {
         if (healthBarInstance != null)
         {
@@ -88,18 +105,17 @@ public class Building : MonoBehaviour
             healthBarInstance = Instantiate(criticalHealthBarPrefab, transform);
         }
 
+        // Убедимся, что полоска здоровья корректно позиционируется над зданием
         if (healthBarInstance != null)
         {
             if (buildingType == BuildingType.Fortress)
             {
-                // Если здание крепость, то позиционируем полоску здоровья по центру крепости
-                healthBarInstance.transform.localPosition = new Vector3(0.5f, 1.8f, -0.2f); // Позиционирование по центру крепости
+                healthBarInstance.transform.localPosition = new Vector3(0, 2.0f, -0.2f); // Позиционирование над крепостью
             }
             else
             {
-                healthBarInstance.transform.localPosition = new Vector3(0, 0.8f, -0.2f); // Позиционирование над зданием
+                healthBarInstance.transform.localPosition = new Vector3(0, 1.0f, -0.2f); // Позиционирование над обычным зданием
             }
-            Debug.Log($"Health bar created and positioned at: {healthBarInstance.transform.position}");
         }
         else
         {
@@ -109,16 +125,16 @@ public class Building : MonoBehaviour
 
     public void StartTurn()
     {
-        hasProducedUnit = false;
+        hasProducedUnit = false; // Сброс состояния при начале хода
     }
 
     public bool CanProduceUnit()
     {
-        return !hasProducedUnit;
+        return !hasProducedUnit; // Проверка, может ли здание производить юниты
     }
 
     public void ProduceUnit()
     {
-        hasProducedUnit = true;
+        hasProducedUnit = true; // Установка состояния после производства юнита
     }
 }

@@ -43,16 +43,6 @@ public class UnitManager : MonoBehaviour
         }
     }
 
-    public void RegisterBuilding(Building building)
-    {
-        // Логика для регистрации здания (если необходимо)
-    }
-
-    public void UnregisterBuilding(Building building)
-    {
-        // Логика для отмены регистрации здания (если необходимо)
-    }
-
     private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
