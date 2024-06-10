@@ -274,7 +274,7 @@ public class BuildingManager : MonoBehaviour
             Destroy(building.gameObject);
         }
 
-        UnitManager unitManager = TurnManager.Instance.GetUnitManagerForPlayer(playerIndex);
+        UnitManager unitManager = FindObjectOfType<UnitManager>();
         List<Unit> unitsToDestroy = new List<Unit>();
         foreach (var unit in unitManager.units)
         {
@@ -291,7 +291,12 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void StartTurn(int playerIndex)
+    public void Initialize()
+    {
+        isInitialized = true;
+    }
+
+    public void StartTurnForBuildings(int playerIndex)
     {
         foreach (var building in playerBuildings)
         {
@@ -302,8 +307,14 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void Initialize()
+    public void EndTurnForBuildings(int playerIndex)
     {
-        isInitialized = true;
+        foreach (var building in playerBuildings)
+        {
+            if (building.playerIndex == playerIndex)
+            {
+                building.EndTurn();
+            }
+        }
     }
 }

@@ -1,39 +1,31 @@
 using UnityEngine;
 
-public class Tower : MonoBehaviour
+public class Tower : Building
 {
-    public int attackPower = 5;
-    public float attackRange = 5f;
-    private Transform target;
+    public int attackRange;
+    public int attackPower;
 
-    private void Update()
+    void Start()
     {
-        FindTarget();
-        AttackTarget();
+        base.Start();
     }
 
-    private void FindTarget()
+    public override void EndTurn()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange);
-        foreach (Collider2D hit in hits)
-        {
-            Unit unit = hit.GetComponent<Unit>();
-            if (unit != null)
-            {
-                target = unit.transform;
-                break;
-            }
-        }
+        base.EndTurn();
+        AttackNearbyEnemies();
     }
 
-    private void AttackTarget()
+    void AttackNearbyEnemies()
     {
-        if (target != null)
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+        foreach (var hitCollider in hitColliders)
         {
-            Unit unit = target.GetComponent<Unit>();
-            if (unit != null)
+            Unit unit = hitCollider.GetComponent<Unit>();
+            if (unit != null && unit.playerIndex != playerIndex)
             {
                 unit.TakeDamage(attackPower);
+                Debug.Log($"Tower attacked {unit.name} and dealt {attackPower} damage");
             }
         }
     }

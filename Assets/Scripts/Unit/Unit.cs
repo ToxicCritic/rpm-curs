@@ -47,21 +47,26 @@ public class Unit : MonoBehaviour
 
         float healthPercentage = (float)health / maxHealth;
 
-        if (healthPercentage > 0.75f)
+        if (healthPercentage > 0.8f)
         {
             healthBarInstance = Instantiate(fullHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.5f)
+        else if (healthPercentage > 0.6f)
         {
             healthBarInstance = Instantiate(threeQuarterHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.25f)
+        else if (healthPercentage > 0.4f)
         {
             healthBarInstance = Instantiate(halfHealthBarPrefab, transform);
         }
-        else
+        else if (healthPercentage > 0.2f)
+        {
+            healthBarInstance = Instantiate(quarterHealthBarPrefab, transform);
+        }
+        else 
         {
             healthBarInstance = Instantiate(criticalHealthBarPrefab, transform);
+
         }
 
         if (healthBarInstance != null)

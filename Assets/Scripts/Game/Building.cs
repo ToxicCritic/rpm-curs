@@ -27,7 +27,7 @@ public class Building : MonoBehaviour
 
     private GameObject healthBarInstance;
 
-    void Start()
+    protected void Start()
     {
         buildingManager = FindObjectOfType<BuildingManager>();
         buildingManager.RegisterBuilding(this);
@@ -100,9 +100,25 @@ public class Building : MonoBehaviour
         Debug.Log($"Health bar created and positioned at: {healthBarInstance.transform.position}");
     }
 
-    public void StartTurn()
+    public virtual void StartTurn()
     {
         hasProducedUnit = false;
+        if (buildingType == BuildingType.Mine)
+        {
+            GenerateGold();
+        }
+    }
+
+    void GenerateGold()
+    {
+        PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
+        currentPlayerResourceManager.AddResource("gold", 3); // Пример генерации золота
+        Debug.Log($"Шахта добыла 3 золота для игрока {playerIndex}");
+    }
+
+    public virtual void EndTurn()
+    {
+        // Do nothing here, override in derived classes if needed
     }
 
     public bool CanProduceUnit()

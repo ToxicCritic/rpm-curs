@@ -9,12 +9,13 @@ public class TurnManager : MonoBehaviour
 
     public List<UnitManager> unitManagers;
     public List<PlayerResourceManager> playerResourceManagers;
-    public BuildingManager buildingManager;
+    public BuildingManager buildingManager; // Обновленный BuildingManager
     public Button endTurnButton;
     public TMP_Text turnText;
     private int currentTurnIndex = 1; // Начинаем с 1
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
-    private bool[] activePlayers;
+
+    private HashSet<int> activePlayers;
 
     void Awake()
     {
@@ -26,12 +27,7 @@ public class TurnManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        activePlayers = new bool[playerNames.Length];
-        for (int i = 0; i < activePlayers.Length; i++)
-        {
-            activePlayers[i] = true;
-        }
+        activePlayers = new HashSet<int> { 1, 2, 3, 4 }; // Все игроки активны в начале игры
     }
 
     void Start()
@@ -47,27 +43,34 @@ public class TurnManager : MonoBehaviour
 
     void StartTurn()
     {
-        if (activePlayers[currentTurnIndex - 1])
+        if (!activePlayers.Contains(currentTurnIndex))
         {
-            Debug.Log($"Starting turn for player {currentTurnIndex}");
-            unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex);
-            buildingManager.SetPlayer(currentTurnIndex);
-            buildingManager.StartTurn(currentTurnIndex);
-            playerResourceManagers[currentTurnIndex - 1].StartTurn();
-            UpdateTurnText();
+            EndTurn(); // Пропускаем ход, если игрок не активен
+            return;
         }
-        else
-        {
-            EndTurn();
-        }
+
+        Debug.Log($"Starting turn for player {currentTurnIndex}");
+        unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex); // Индексация с 1
+        buildingManager.SetPlayer(currentTurnIndex); // Обновление доступных зданий для текущего игрока
+        buildingManager.StartTurnForBuildings(currentTurnIndex);
+        playerResourceManagers[currentTurnIndex - 1].StartTurn(); // Обновление ресурсов для текущего игрока
+        UpdateTurnText();
     }
 
     public void EndTurn()
     {
         Debug.Log($"Ending turn for player {currentTurnIndex}");
         unitManagers[currentTurnIndex - 1].EndTurn();
-        playerResourceManagers[currentTurnIndex - 1].EndTurn();
-        currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
+        buildingManager.EndTurnForBuildings(currentTurnIndex);
+        playerResourceManagers[currentTurnIndex - 1].EndTurn(); // Завершение хода для текущего игрока
+        currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1; // Переключение между всеми игроками
+
+        // Пропускаем ходы неактивных игроков
+        while (!activePlayers.Contains(currentTurnIndex))
+        {
+            currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
+        }
+
         Debug.Log($"Next turn index: {currentTurnIndex}");
         StartTurn();
     }
@@ -110,6 +113,7 @@ public class TurnManager : MonoBehaviour
 
     public void DeactivatePlayer(int playerIndex)
     {
-        activePlayers[playerIndex - 1] = false;
+        activePlayers.Remove(playerIndex);
+        Debug.Log($"Player {playerNames[playerIndex - 1]} has been deactivated.");
     }
 }

@@ -60,11 +60,17 @@ public class UnitManager : MonoBehaviour
                 {
                     SelectUnit(hitUnit);
                 }
+                else if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitUnit.transform.position) <= SelectedUnit.attackRange + 0.5f)
+                {
+                    SelectedUnit.SetTarget(hitUnit.transform);
+                    SelectedUnit.Attack();
+                    DeselectUnit();
+                }
             }
             else if (hitCollider != null && hitCollider.GetComponent<Building>() != null)
             {
                 Building hitBuilding = hitCollider.GetComponent<Building>();
-                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 2)
+                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5f)
                 {
                     SelectedUnit.SetTarget(hitBuilding.transform);
                     SelectedUnit.Attack();
@@ -73,7 +79,7 @@ public class UnitManager : MonoBehaviour
             }
             else if (SelectedUnit != null)
             {
-                Vector3 destination = new Vector3(Mathf.Floor(clickPosition.x) + 0.5f, Mathf.Floor(clickPosition.y), -0.2f);
+                Vector3 destination = new Vector3(Mathf.Floor(clickPosition.x) + 0.5f, Mathf.Floor(clickPosition.y), -0.1f);
                 if (SelectedUnit.CanMoveTo(destination))
                 {
                     SelectedUnit.MoveTo(destination);
@@ -122,17 +128,6 @@ public class UnitManager : MonoBehaviour
         ClearAttackRangeIndicators();
     }
 
-    public void ShowRangeIndicators(Unit unit)
-    {
-        ShowMoveRangeIndicators(unit);
-        ShowAttackRangeIndicators(unit);
-    }
-
-    public void ClearRangeIndicators()
-    {
-        ClearMoveRangeIndicators();
-        ClearAttackRangeIndicators();
-    }
 
     private void ShowMoveRangeIndicators(Unit unit)
     {

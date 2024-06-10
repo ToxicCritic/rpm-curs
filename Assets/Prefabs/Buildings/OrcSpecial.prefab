@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5404296534045867457}
   - component: {fileID: 1099219060780359576}
   - component: {fileID: 7084235926416187950}
-  - component: {fileID: 3708340575811792610}
+  - component: {fileID: -1916378979361866556}
   m_Layer: 6
   m_Name: OrcSpecial
   m_TagString: Building
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wood: 25
   stone: 25
---- !u!114 &3708340575811792610
+--- !u!114 &-1916378979361866556
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,15 +155,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 7591850781511691085}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0e0f0da583e83b429655dde9d5de7b5, type: 3}
+  m_Script: {fileID: 11500000, guid: 819db7165c182d54e84644df9ab41f37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   buildingType: 3
+  playerIndex: 1
   health: 100
   maxHealth: 100
-  playerIndex: 1
+  hasProducedUnit: 0
   fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
   threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
   halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}
   quarterHealthBarPrefab: {fileID: 3027940406558746717, guid: 80969a1473e0b244fbb31a69068a6ff4, type: 3}
   criticalHealthBarPrefab: {fileID: 5681146982043963799, guid: e7f80921bb935c440849a808c2bcfa55, type: 3}
+  attackRange: 4
+  attackPower: 15
