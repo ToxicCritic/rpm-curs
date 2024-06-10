@@ -12,11 +12,9 @@ public class TurnManager : MonoBehaviour
     public BuildingManager buildingManager;
     public Button endTurnButton;
     public TMP_Text turnText;
-    public TMP_Text victoryText;
-
     private int currentTurnIndex = 1; // Начинаем с 1
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
-    private bool[] playersActive;
+    private bool[] activePlayers;
 
     void Awake()
     {
@@ -28,6 +26,12 @@ public class TurnManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        activePlayers = new bool[playerNames.Length];
+        for (int i = 0; i < activePlayers.Length; i++)
+        {
+            activePlayers[i] = true;
+        }
     }
 
     void Start()
@@ -37,44 +41,33 @@ public class TurnManager : MonoBehaviour
             Debug.LogError("UnitManagers and PlayerResourceManagers count should be equal to 4.");
         }
 
-        playersActive = new bool[4];
-        for (int i = 0; i < 4; i++)
-        {
-            playersActive[i] = true;
-        }
-
-        buildingManager.Initialize();
         StartTurn();
         endTurnButton.onClick.AddListener(EndTurn);
     }
 
     void StartTurn()
     {
-        // Пропускаем ход неактивных игроков
-        while (!playersActive[currentTurnIndex - 1])
+        if (activePlayers[currentTurnIndex - 1])
         {
-            currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
+            Debug.Log($"Starting turn for player {currentTurnIndex}");
+            unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex);
+            buildingManager.SetPlayer(currentTurnIndex);
+            buildingManager.StartTurn(currentTurnIndex);
+            playerResourceManagers[currentTurnIndex - 1].StartTurn();
+            UpdateTurnText();
         }
-
-        Debug.Log($"Starting turn for player {currentTurnIndex}");
-        unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex - 1);
-        buildingManager.SetPlayer(currentTurnIndex);
-        playerResourceManagers[currentTurnIndex - 1].StartTurn();
-        UpdateTurnText();
+        else
+        {
+            EndTurn();
+        }
     }
 
     public void EndTurn()
     {
         Debug.Log($"Ending turn for player {currentTurnIndex}");
-
         unitManagers[currentTurnIndex - 1].EndTurn();
         playerResourceManagers[currentTurnIndex - 1].EndTurn();
-
-        do
-        {
-            currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
-        } while (!playersActive[currentTurnIndex - 1]);
-
+        currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
         Debug.Log($"Next turn index: {currentTurnIndex}");
         StartTurn();
     }
@@ -110,38 +103,13 @@ public class TurnManager : MonoBehaviour
         return currentTurnIndex;
     }
 
-    public void CheckVictoryCondition()
+    public UnitManager GetUnitManagerForPlayer(int playerIndex)
     {
-        int activePlayers = 0;
-        int lastActivePlayer = -1;
-
-        for (int i = 0; i < playersActive.Length; i++)
-        {
-            if (playersActive[i])
-            {
-                activePlayers++;
-                lastActivePlayer = i;
-            }
-        }
-
-        if (activePlayers == 1)
-        {
-            DeclareVictory(lastActivePlayer + 1);
-        }
-    }
-
-    void DeclareVictory(int playerIndex)
-    {
-        victoryText.gameObject.SetActive(true);
-        victoryText.text = $"Победитель: {playerNames[playerIndex - 1]}!";
-        Debug.Log($"Победитель: {playerNames[playerIndex - 1]}!");
-
-        endTurnButton.gameObject.SetActive(false);
+        return unitManagers[playerIndex - 1];
     }
 
     public void DeactivatePlayer(int playerIndex)
     {
-        playersActive[playerIndex - 1] = false;
-        CheckVictoryCondition();
+        activePlayers[playerIndex - 1] = false;
     }
 }

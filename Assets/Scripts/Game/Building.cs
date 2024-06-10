@@ -8,13 +8,16 @@ public class Building : MonoBehaviour
         Barracks,
         Mine,
         Tower,
-        Fortress
+        Fortress // Добавлено крепость
     }
 
     public BuildingType buildingType;
+    public int playerIndex;
     public int health;
     public int maxHealth;
-    public int playerIndex; // Индекс игрока
+    public bool hasProducedUnit = false;
+
+    private BuildingManager buildingManager;
 
     public GameObject fullHealthBarPrefab;
     public GameObject threeQuarterHealthBarPrefab;
@@ -24,33 +27,16 @@ public class Building : MonoBehaviour
 
     private GameObject healthBarInstance;
 
-    private BuildingManager buildingManager;
-
-    private bool hasProducedUnit; // Добавляем переменную для отслеживания производства юнитов
-
     void Start()
     {
         buildingManager = FindObjectOfType<BuildingManager>();
-        if (buildingManager != null)
-        {
-            buildingManager.RegisterBuilding(this);
-        }
-
-        // Создаем полоску здоровья
+        buildingManager.RegisterBuilding(this);
         UpdateHealthBar();
-    }
-
-    void OnDestroy()
-    {
-        if (buildingManager != null)
-        {
-            buildingManager.UnregisterBuilding(this);
-        }
     }
 
     void OnMouseDown()
     {
-        if (buildingManager != null && buildingType != BuildingType.Fortress)
+        if (TurnManager.Instance.GetCurrentPlayerIndex() == playerIndex)
         {
             buildingManager.ShowUnitCreationPanel(this);
         }
@@ -63,15 +49,12 @@ public class Building : MonoBehaviour
         {
             Die();
         }
-        else
-        {
-            UpdateHealthBar();
-        }
+        UpdateHealthBar();
     }
 
     public void Die()
     {
-        // Реализация логики разрушения здания
+        buildingManager.UnregisterBuilding(this);
         Destroy(gameObject);
     }
 
@@ -84,19 +67,19 @@ public class Building : MonoBehaviour
 
         float healthPercentage = (float)health / maxHealth;
 
-        if (healthPercentage > 0.75f)
+        if (healthPercentage > 0.8f)
         {
             healthBarInstance = Instantiate(fullHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.5f)
+        else if (healthPercentage > 0.6f)
         {
             healthBarInstance = Instantiate(threeQuarterHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.25f)
+        else if (healthPercentage > 0.4f)
         {
             healthBarInstance = Instantiate(halfHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.1f)
+        else if (healthPercentage > 0.2f)
         {
             healthBarInstance = Instantiate(quarterHealthBarPrefab, transform);
         }
@@ -105,36 +88,30 @@ public class Building : MonoBehaviour
             healthBarInstance = Instantiate(criticalHealthBarPrefab, transform);
         }
 
-        // Убедимся, что полоска здоровья корректно позиционируется над зданием
-        if (healthBarInstance != null)
+        if (buildingType == BuildingType.Fortress)
         {
-            if (buildingType == BuildingType.Fortress)
-            {
-                healthBarInstance.transform.localPosition = new Vector3(0, 2.0f, -0.2f); // Позиционирование над крепостью
-            }
-            else
-            {
-                healthBarInstance.transform.localPosition = new Vector3(0, 1.0f, -0.2f); // Позиционирование над обычным зданием
-            }
+            healthBarInstance.transform.localPosition = new Vector3(0.5f, 1.8f, -0.2f); // Позиционирование над крепостью
         }
         else
         {
-            Debug.LogError("Failed to create health bar instance.");
+            healthBarInstance.transform.localPosition = new Vector3(0, 0.8f, -0.2f); // Позиционирование над зданием
         }
+
+        Debug.Log($"Health bar created and positioned at: {healthBarInstance.transform.position}");
     }
 
     public void StartTurn()
     {
-        hasProducedUnit = false; // Сброс состояния при начале хода
+        hasProducedUnit = false;
     }
 
     public bool CanProduceUnit()
     {
-        return !hasProducedUnit; // Проверка, может ли здание производить юниты
+        return !hasProducedUnit;
     }
 
     public void ProduceUnit()
     {
-        hasProducedUnit = true; // Установка состояния после производства юнита
+        hasProducedUnit = true;
     }
 }

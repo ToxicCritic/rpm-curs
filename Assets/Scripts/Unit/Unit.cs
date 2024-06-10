@@ -22,7 +22,7 @@ public class Unit : MonoBehaviour
     public GameObject threeQuarterHealthBarPrefab;
     public GameObject halfHealthBarPrefab;
     public GameObject quarterHealthBarPrefab;
-    public GameObject oneEighthHealthBarPrefab; // Префаб для 1/8 здоровья
+    public GameObject criticalHealthBarPrefab;
 
     private GameObject healthBarInstance;
 
@@ -32,10 +32,9 @@ public class Unit : MonoBehaviour
         hasAttacked = false;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
-        unitManager = FindObjectOfType<UnitManager>();
+        unitManager = TurnManager.Instance.GetUnitManagerForPlayer(playerIndex); // Получаем UnitManager для соответствующего игрока
         unitManager.RegisterUnit(this);
 
-        // Создаем полоску здоровья
         UpdateHealthBar();
     }
 
@@ -48,30 +47,27 @@ public class Unit : MonoBehaviour
 
         float healthPercentage = (float)health / maxHealth;
 
-        if (healthPercentage > 0.875f)
+        if (healthPercentage > 0.75f)
         {
             healthBarInstance = Instantiate(fullHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.625f)
+        else if (healthPercentage > 0.5f)
         {
             healthBarInstance = Instantiate(threeQuarterHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.375f)
+        else if (healthPercentage > 0.25f)
         {
             healthBarInstance = Instantiate(halfHealthBarPrefab, transform);
         }
-        else if (healthPercentage > 0.125f)
-        {
-            healthBarInstance = Instantiate(quarterHealthBarPrefab, transform);
-        }
         else
         {
-            healthBarInstance = Instantiate(oneEighthHealthBarPrefab, transform);
+            healthBarInstance = Instantiate(criticalHealthBarPrefab, transform);
         }
 
         if (healthBarInstance != null)
         {
             healthBarInstance.transform.localPosition = new Vector3(0, 1.0f, -0.2f);
+            Debug.Log($"Health bar created and positioned at: {healthBarInstance.transform.position}");
         }
         else
         {
@@ -123,46 +119,45 @@ public class Unit : MonoBehaviour
 
     public void Attack()
     {
-        if (target != null && CanAttack())
+        if (target != null && CanAttack() && Vector3.Distance(transform.position, target.position) <= attackRange + 2)
         {
-            float distance = Vector3.Distance(transform.position, target.position);
-            if (distance <= attackRange + 2f)
+            Unit targetUnit = target.GetComponent<Unit>();
+            if (targetUnit != null)
+            {
+                Debug.Log($"{gameObject.name} наносит {attackPower} урона {targetUnit.gameObject.name}");
+                targetUnit.TakeDamage(attackPower);
+                if (targetUnit.health <= 0)
+                {
+                    Debug.Log($"{targetUnit.gameObject.name} был убит!");
+                    transform.position = target.position;
+                    unitManager.UnregisterUnit(targetUnit);
+                    Destroy(target.gameObject);
+                }
+                hasAttacked = true;
+            }
+            else
             {
                 Building targetBuilding = target.GetComponent<Building>();
-                Unit targetUnit = target.GetComponent<Unit>();
-
                 if (targetBuilding != null)
                 {
                     Debug.Log($"{gameObject.name} наносит {attackPower} урона {targetBuilding.gameObject.name}");
                     targetBuilding.TakeDamage(attackPower);
                     if (targetBuilding.health <= 0)
                     {
-                        Debug.Log($"{targetBuilding.gameObject.name} был уничтожен!");
+                        Debug.Log($"{targetBuilding.gameObject.name} было разрушено!");
                         Destroy(targetBuilding.gameObject);
                     }
+                    hasAttacked = true;
                 }
-                else if (targetUnit != null)
+                else
                 {
-                    Debug.Log($"{gameObject.name} наносит {attackPower} урона {targetUnit.gameObject.name}");
-                    targetUnit.TakeDamage(attackPower);
-                    if (targetUnit.health <= 0)
-                    {
-                        Debug.Log($"{targetUnit.gameObject.name} был убит!");
-                        unitManager.UnregisterUnit(targetUnit);
-                        Destroy(targetUnit.gameObject);
-                    }
+                    Debug.LogError("Цель не является юнитом или зданием.");
                 }
-
-                hasAttacked = true;
-            }
-            else
-            {
-                Debug.LogError("Цель вне досягаемости.");
             }
         }
         else
         {
-            Debug.LogError("Цель отсутствует или атака уже совершена.");
+            Debug.LogError("Цель вне досягаемости или атака уже совершена.");
         }
     }
 
@@ -177,7 +172,7 @@ public class Unit : MonoBehaviour
     {
         if (spriteRenderer != null)
         {
-            spriteRenderer.color = Color.green; // Изменяем цвет для выделения
+            spriteRenderer.color = Color.green;
         }
     }
 
@@ -185,7 +180,7 @@ public class Unit : MonoBehaviour
     {
         if (spriteRenderer != null)
         {
-            spriteRenderer.color = originalColor; // Возвращаем оригинальный цвет
+            spriteRenderer.color = originalColor;
         }
     }
 }

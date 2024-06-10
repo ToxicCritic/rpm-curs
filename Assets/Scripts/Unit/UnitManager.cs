@@ -64,7 +64,7 @@ public class UnitManager : MonoBehaviour
             else if (hitCollider != null && hitCollider.GetComponent<Building>() != null)
             {
                 Building hitBuilding = hitCollider.GetComponent<Building>();
-                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 2)
+                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5)
                 {
                     SelectedUnit.SetTarget(hitBuilding.transform);
                     SelectedUnit.Attack();
@@ -122,6 +122,18 @@ public class UnitManager : MonoBehaviour
         ClearAttackRangeIndicators();
     }
 
+    public void ShowRangeIndicators(Unit unit)
+    {
+        ShowMoveRangeIndicators(unit);
+        ShowAttackRangeIndicators(unit);
+    }
+
+    public void ClearRangeIndicators()
+    {
+        ClearMoveRangeIndicators();
+        ClearAttackRangeIndicators();
+    }
+
     private void ShowMoveRangeIndicators(Unit unit)
     {
         ClearMoveRangeIndicators();
@@ -156,7 +168,7 @@ public class UnitManager : MonoBehaviour
         {
             for (int y = Mathf.CeilToInt(-attackRange); y <= Mathf.FloorToInt(attackRange); y++)
             {
-                if (Mathf.Abs(x) + Mathf.Abs(y) <= attackRange + 2)
+                if (Mathf.Sqrt(x * x + y * y) <= attackRange + 2)
                 {
                     Vector3 indicatorPosition = new Vector3(unitPosition.x + x, unitPosition.y + y + 0.5f, attackZPosition);
                     GameObject indicator = Instantiate(attackRangeIndicatorPrefab, indicatorPosition, Quaternion.identity);
@@ -189,7 +201,10 @@ public class UnitManager : MonoBehaviour
         isTurnActive = true;
         foreach (var unit in units)
         {
-            unit.StartTurn();
+            if (unit.playerIndex == playerIndex)
+            {
+                unit.StartTurn();
+            }
         }
     }
 
