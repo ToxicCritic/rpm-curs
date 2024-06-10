@@ -64,7 +64,7 @@ public class UnitManager : MonoBehaviour
             else if (hitCollider != null && hitCollider.GetComponent<Building>() != null)
             {
                 Building hitBuilding = hitCollider.GetComponent<Building>();
-                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5)
+                if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 2)
                 {
                     SelectedUnit.SetTarget(hitBuilding.transform);
                     SelectedUnit.Attack();
@@ -73,7 +73,7 @@ public class UnitManager : MonoBehaviour
             }
             else if (SelectedUnit != null)
             {
-                Vector3 destination = new Vector3(Mathf.Floor(clickPosition.x) + 0.5f, Mathf.Floor(clickPosition.y), -0.1f);
+                Vector3 destination = new Vector3(Mathf.Floor(clickPosition.x) + 0.5f, Mathf.Floor(clickPosition.y), -0.2f);
                 if (SelectedUnit.CanMoveTo(destination))
                 {
                     SelectedUnit.MoveTo(destination);
