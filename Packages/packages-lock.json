@@ -1,15 +1,5 @@
 {
   "dependencies": {
-    "com.lmz.mapgenerator": {
-      "version": "https://github.com/zamecki/MapGenerator.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.modules.tilemap": "1.0.0",
-        "com.unity.2d.tilemap": "1.0.0"
-      },
-      "hash": "1ecbe6da6062fd42e84672f26a49487cb49f7af9"
-    },
     "com.unity.2d.animation": {
       "version": "9.1.0",
       "depth": 1,
@@ -129,6 +119,13 @@
         "com.unity.burst": "1.6.6",
         "com.unity.test-framework": "1.1.31"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.device-simulator.devices": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.ext.nunit": {

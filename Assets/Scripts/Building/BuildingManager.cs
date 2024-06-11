@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -317,4 +318,62 @@ public class BuildingManager : MonoBehaviour
             }
         }
     }
+
+    public void SaveBuildings()
+    {
+        int buildingIndex = 0;
+        foreach (var building in playerBuildings)
+        {
+            PlayerPrefs.SetInt($"Building{buildingIndex}_Type", (int)building.buildingType);
+            PlayerPrefs.SetInt($"Building{buildingIndex}_PlayerIndex", building.playerIndex);
+            PlayerPrefs.SetInt($"Building{buildingIndex}_Health", building.health);
+            PlayerPrefs.SetFloat($"Building{buildingIndex}_PositionX", building.transform.position.x);
+            PlayerPrefs.SetFloat($"Building{buildingIndex}_PositionY", building.transform.position.y);
+            buildingIndex++;
+        }
+        PlayerPrefs.SetInt("BuildingCount", buildingIndex);
+    }
+
+    public void LoadBuildings()
+    {
+        int buildingCount = PlayerPrefs.GetInt("BuildingCount", 0);
+        for (int i = 0; i < buildingCount; i++)
+        {
+            Building.BuildingType buildingType = (Building.BuildingType)PlayerPrefs.GetInt($"Building{i}_Type");
+            int playerIndex = PlayerPrefs.GetInt($"Building{i}_PlayerIndex");
+            int health = PlayerPrefs.GetInt($"Building{i}_Health");
+            float positionX = PlayerPrefs.GetFloat($"Building{i}_PositionX");
+            float positionY = PlayerPrefs.GetFloat($"Building{i}_PositionY");
+
+            GameObject buildingPrefab = GetBuildingPrefab(buildingType, playerIndex);
+            if (buildingPrefab != null)
+            {
+                Vector3 position = new Vector3(positionX, positionY, -0.1f);
+                GameObject buildingObject = Instantiate(buildingPrefab, position, Quaternion.identity);
+                Building building = buildingObject.GetComponent<Building>();
+                building.playerIndex = playerIndex;
+                building.health = health;
+                RegisterBuilding(building);
+            }
+        }
+    }
+
+    private GameObject GetBuildingPrefab(Building.BuildingType buildingType, int playerIndex)
+    {
+        switch (playerIndex)
+        {
+            case 1:
+                return orcBuildings[(int)buildingType];
+            case 2:
+                return humanBuildings[(int)buildingType];
+            case 3:
+                return undeadBuildings[(int)buildingType];
+            case 4:
+                return elfBuildings[(int)buildingType];
+            default:
+                return null;
+        }
+    }
+
+
 }

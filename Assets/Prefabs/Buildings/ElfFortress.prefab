@@ -50,9 +50,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingType: 4
+  playerIndex: 4
   health: 200
   maxHealth: 200
-  playerIndex: 4
+  hasProducedUnit: 0
   fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
   threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
   halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}

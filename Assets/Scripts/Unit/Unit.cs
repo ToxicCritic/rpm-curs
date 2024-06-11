@@ -3,6 +3,7 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     public int playerIndex;
+    public int unitIndex;
     public int health;
     public int maxHealth;
     public int attackPower;

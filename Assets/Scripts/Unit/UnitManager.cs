@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,11 @@ public class UnitManager : MonoBehaviour
     private GameObject tileHighlighterInstance;
     public GameObject moveRangeIndicatorPrefab;
     public GameObject attackRangeIndicatorPrefab;
+
+    public GameObject[] orcUnits;
+    public GameObject[] elfUnits;
+    public GameObject[] humanUnits;
+    public GameObject[] undeadUnits;
 
     private List<GameObject> moveRangeIndicators = new List<GameObject>();
     private List<GameObject> attackRangeIndicators = new List<GameObject>();
@@ -78,7 +84,7 @@ public class UnitManager : MonoBehaviour
                 else if (hitCollider.GetComponent<Building>() != null)
                 {
                     Building hitBuilding = hitCollider.GetComponent<Building>();
-                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 0.5f)
+                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 1f)
                     {
                         SelectedUnit.SetTarget(hitBuilding.transform);
                         SelectedUnit.Attack();
@@ -242,4 +248,65 @@ public class UnitManager : MonoBehaviour
             unit.EndTurn();
         }
     }
+
+    public void SaveUnits()
+    {
+        int unitIndex = 0;
+        foreach (var unit in units)
+        {
+            PlayerPrefs.SetInt($"Unit{unitIndex}_PlayerIndex", unit.playerIndex);
+            PlayerPrefs.SetInt($"Unit{unitIndex}_UnitIndex", unit.unitIndex); // Индекс типа юнита
+            PlayerPrefs.SetInt($"Unit{unitIndex}_Health", unit.health);
+            PlayerPrefs.SetInt($"Unit{unitIndex}_AttackPower", unit.attackPower);
+            PlayerPrefs.SetFloat($"Unit{unitIndex}_PositionX", unit.transform.position.x);
+            PlayerPrefs.SetFloat($"Unit{unitIndex}_PositionY", unit.transform.position.y);
+            unitIndex++;
+        }
+        PlayerPrefs.SetInt("UnitCount", unitIndex);
+    }
+
+    public void LoadUnits()
+    {
+        int unitCount = PlayerPrefs.GetInt("UnitCount", 0);
+        for (int i = 0; i < unitCount; i++)
+        {
+            int playerIndex = PlayerPrefs.GetInt($"Unit{i}_PlayerIndex");
+            int unitIndex = PlayerPrefs.GetInt($"Unit{i}_UnitIndex");
+            int health = PlayerPrefs.GetInt($"Unit{i}_Health");
+            int attackPower = PlayerPrefs.GetInt($"Unit{i}_AttackPower");
+            float positionX = PlayerPrefs.GetFloat($"Unit{i}_PositionX");
+            float positionY = PlayerPrefs.GetFloat($"Unit{i}_PositionY");
+
+            GameObject unitPrefab = GetUnitPrefab(playerIndex, unitIndex);
+            if (unitPrefab != null)
+            {
+                Vector3 position = new Vector3(positionX, positionY, -0.1f);
+                GameObject unitObject = Instantiate(unitPrefab, position, Quaternion.identity);
+                Unit unit = unitObject.GetComponent<Unit>();
+                unit.playerIndex = playerIndex;
+                unit.unitIndex = unitIndex;
+                unit.health = health;
+                unit.attackPower = attackPower;
+                RegisterUnit(unit);
+            }
+        }
+    }
+
+    public GameObject GetUnitPrefab(int playerIndex, int unitIndex)
+    {
+        switch (playerIndex)
+        {
+            case 1:
+                return orcUnits[unitIndex];
+            case 2:
+                return humanUnits[unitIndex];
+            case 3:
+                return undeadUnits[unitIndex];
+            case 4:
+                return elfUnits[unitIndex];
+            default:
+                return null;
+        }
+    }
+
 }

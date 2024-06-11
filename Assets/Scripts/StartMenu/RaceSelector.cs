@@ -5,13 +5,13 @@ public class RaceSelector : MonoBehaviour
 {
     public void SelectOrc()
     {
-        PlayerPrefs.SetInt("SelectedRace", 0);
+        PlayerPrefs.SetInt("SelectedRace", 1);
         LoadGameScene();
     }
 
     public void SelectElf()
     {
-        PlayerPrefs.SetInt("SelectedRace", 1);
+        PlayerPrefs.SetInt("SelectedRace", 4);
         LoadGameScene();
     }
 

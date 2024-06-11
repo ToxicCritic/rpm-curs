@@ -108,19 +108,18 @@ public class PlayerResourceManager : MonoBehaviour
         UpdateResourceUI();
     }
 
-    public void RegisterMine(Mine mine)
+    public void SavePlayerResources(int playerIndex)
     {
-        if (!mines.Contains(mine))
-        {
-            mines.Add(mine);
-        }
+        PlayerPrefs.SetInt($"Player{playerIndex}_Wood", wood);
+        PlayerPrefs.SetInt($"Player{playerIndex}_Stone", stone);
+        PlayerPrefs.SetInt($"Player{playerIndex}_Gold", gold);
     }
 
-    public void UnregisterMine(Mine mine)
+    public void LoadPlayerResources(int playerIndex)
     {
-        if (mines.Contains(mine))
-        {
-            mines.Remove(mine);
-        }
+        wood = PlayerPrefs.GetInt($"Player{playerIndex}_Wood", 0);
+        stone = PlayerPrefs.GetInt($"Player{playerIndex}_Stone", 0);
+        gold = PlayerPrefs.GetInt($"Player{playerIndex}_Gold", 0);
+        UpdateResourceUI();
     }
 }

@@ -12,6 +12,10 @@ public class TurnManager : MonoBehaviour
     public BuildingManager buildingManager; // Обновленный BuildingManager
     public Button endTurnButton;
     public TMP_Text turnText;
+
+    public TMP_Text gameOverText;
+    public Image gameOverOutline;
+    
     private int currentTurnIndex = 1; // Начинаем с 1
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
 
@@ -36,7 +40,7 @@ public class TurnManager : MonoBehaviour
         {
             Debug.LogError("UnitManagers and PlayerResourceManagers count should be equal to 4.");
         }
-
+        currentTurnIndex = PlayerPrefs.GetInt("SelectedRace", 1);
         StartTurn();
         endTurnButton.onClick.AddListener(EndTurn);
     }
@@ -81,6 +85,13 @@ public class TurnManager : MonoBehaviour
         {
             EndTurn();
         }
+
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            SaveGame();
+            // Загрузка сцены главного меню
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
     }
 
     void UpdateTurnText()
@@ -115,5 +126,39 @@ public class TurnManager : MonoBehaviour
     {
         activePlayers.Remove(playerIndex);
         Debug.Log($"Player {playerNames[playerIndex - 1]} has been deactivated.");
+
+        if (activePlayers.Count == 1) 
+        {
+            gameOverText.text = $"Игра окончена! Победитель: {playerNames[currentTurnIndex - 1]}";
+            gameOverOutline.gameObject.SetActive(true);
+            turnText.gameObject.SetActive(false);
+            endTurnButton.gameObject.SetActive(false);
+            Debug.Log($"Game over! Player {currentTurnIndex} has won the game!");
+            buildingManager.DestroyPlayerBuildingsAndUnits(currentTurnIndex);
+        }
+    }
+
+    public void SaveGame()
+    {
+        PlayerPrefs.SetInt("CurrentTurnIndex", currentTurnIndex);
+        for (int i = 0; i < unitManagers.Count; i++)
+        {
+            unitManagers[i].SaveUnits();
+            playerResourceManagers[i].SavePlayerResources(i + 1);
+        }
+        buildingManager.SaveBuildings();
+        PlayerPrefs.Save();
+    }
+
+    public void LoadGame()
+    {
+        currentTurnIndex = PlayerPrefs.GetInt("CurrentTurnIndex", 1);
+        for (int i = 0; i < unitManagers.Count; i++)
+        {
+            unitManagers[i].LoadUnits();
+            playerResourceManagers[i].LoadPlayerResources(i + 1);
+        }
+        buildingManager.LoadBuildings();
+        UpdateTurnText();
     }
 }
