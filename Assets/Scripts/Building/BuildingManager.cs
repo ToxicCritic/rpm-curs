@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static Building;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -36,7 +40,6 @@ public class BuildingManager : MonoBehaviour
 
     public List<Building> playerBuildings = new List<Building>();
 
-    private bool isInitialized = false;
 
     void Start()
     {
@@ -125,6 +128,7 @@ public class BuildingManager : MonoBehaviour
         Vector3Int gridPosition = Vector3Int.FloorToInt(mousePosition);
         gridPosition.z = 0;
 
+        // Обновление позиции хайлайтера (подсветки)
         if (alwaysOnHighlighterInstance.activeSelf)
         {
             Vector3 alwaysOnHighlighterPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.2f);
@@ -137,6 +141,7 @@ public class BuildingManager : MonoBehaviour
             tileHighlighterInstance.transform.position = placePosition;
         }
 
+        // Проверка на возможность установки здания
         if (selectedBuildingPrefab != null && Input.GetMouseButtonDown(0))
         {
             if (CanPlaceBuilding(gridPosition) && IsWithinMapBounds(gridPosition) && IsInPlayerQuarter(gridPosition))
@@ -153,7 +158,16 @@ public class BuildingManager : MonoBehaviour
                         if (woodSpent && stoneSpent)
                         {
                             Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
-                            Instantiate(selectedBuildingPrefab, spawnPosition, Quaternion.identity);
+
+                            // Инстанцируем здание и сохраняем позицию
+                            GameObject buildingObject = Instantiate(selectedBuildingPrefab, spawnPosition, Quaternion.identity);
+                            Building building = buildingObject.GetComponent<Building>();
+
+                            // Сохраняем позицию здания в его поля positionX и positionY
+                            building.positionX = spawnPosition.x;
+                            building.positionY = spawnPosition.y;
+
+                            // Обнуляем выбор и скрываем хайлайтеры
                             selectedBuildingPrefab = null;
                             tileHighlighterInstance.SetActive(false);
                             alwaysOnHighlighterInstance.SetActive(true);
@@ -176,6 +190,7 @@ public class BuildingManager : MonoBehaviour
             CancelBuildingPlacement();
         }
     }
+
 
     void CancelBuildingPlacement()
     {
@@ -205,13 +220,13 @@ public class BuildingManager : MonoBehaviour
         switch (currentPlayerIndex)
         {
             case 1:
-                return position.x < halfWidth && position.y < halfHeight;
+                return position.x <= halfWidth && position.y <= halfHeight;
             case 2:
-                return position.x < halfWidth && position.y >= halfHeight;
+                return position.x <= halfWidth && position.y >= halfHeight;
             case 3:
                 return position.x >= halfWidth && position.y >= halfHeight;
             case 4:
-                return position.x >= halfWidth && position.y < halfHeight;
+                return position.x >= halfWidth && position.y <= halfHeight;
             default:
                 return false;
         }
@@ -292,11 +307,6 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void Initialize()
-    {
-        isInitialized = true;
-    }
-
     public void StartTurnForBuildings(int playerIndex)
     {
         foreach (var building in playerBuildings)
@@ -319,44 +329,62 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void SaveBuildings()
+    public void SaveBuildingsToFile(StreamWriter writer)
     {
-        int buildingIndex = 0;
+
         foreach (var building in playerBuildings)
         {
-            PlayerPrefs.SetInt($"Building{buildingIndex}_Type", (int)building.buildingType);
-            PlayerPrefs.SetInt($"Building{buildingIndex}_PlayerIndex", building.playerIndex);
-            PlayerPrefs.SetInt($"Building{buildingIndex}_Health", building.health);
-            PlayerPrefs.SetFloat($"Building{buildingIndex}_PositionX", building.transform.position.x);
-            PlayerPrefs.SetFloat($"Building{buildingIndex}_PositionY", building.transform.position.y);
-            buildingIndex++;
+            writer.Write("BuildingData,");
+            writer.WriteLine($"{(int)building.buildingType},{building.playerIndex},{building.health},{building.maxHealth},{building.hasProducedUnit},{building.transform.position.x},{building.transform.position.y}");
         }
-        PlayerPrefs.SetInt("BuildingCount", buildingIndex);
     }
 
-    public void LoadBuildings()
-    {
-        int buildingCount = PlayerPrefs.GetInt("BuildingCount", 0);
-        for (int i = 0; i < buildingCount; i++)
-        {
-            Building.BuildingType buildingType = (Building.BuildingType)PlayerPrefs.GetInt($"Building{i}_Type");
-            int playerIndex = PlayerPrefs.GetInt($"Building{i}_PlayerIndex");
-            int health = PlayerPrefs.GetInt($"Building{i}_Health");
-            float positionX = PlayerPrefs.GetFloat($"Building{i}_PositionX");
-            float positionY = PlayerPrefs.GetFloat($"Building{i}_PositionY");
 
-            GameObject buildingPrefab = GetBuildingPrefab(buildingType, playerIndex);
-            if (buildingPrefab != null)
+    // Метод для загрузки зданий из файла
+    public void LoadBuildingsFromFile(string filePath)
+    {
+        try
+        {
+            using (StreamReader reader = new StreamReader(filePath))
             {
-                Vector3 position = new Vector3(positionX, positionY, -0.1f);
-                GameObject buildingObject = Instantiate(buildingPrefab, position, Quaternion.identity);
-                Building building = buildingObject.GetComponent<Building>();
-                building.playerIndex = playerIndex;
-                building.health = health;
-                RegisterBuilding(building);
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    // Предположим, что данные здания разделены запятыми в строке
+                    string[] data = line.Split(',');
+
+                    BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[0]);
+                    int playerIndex = int.Parse(data[1]);
+                    int health = int.Parse(data[2]);
+                    int maxHealth = int.Parse(data[3]);
+                    float positionX = float.Parse(data[4]);
+                    float positionY = float.Parse(data[5]);
+
+                    // Создаем здание в игре на основе этих данных
+                    GameObject buildingPrefab = GetBuildingPrefab(buildingType, playerIndex); // Метод для получения префаба по типу
+                    Vector3 spawnPosition = new Vector3(positionX, positionY, -0.1f);
+                    GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
+                    Building building = buildingObject.GetComponent<Building>();
+
+                    building.playerIndex = playerIndex;
+                    building.health = health;
+                    building.maxHealth = maxHealth;
+                    building.positionX = positionX;
+                    building.positionY = positionY;
+
+                    // Зарегистрировать здание в BuildingManager
+                    RegisterBuilding(building);
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Ошибка загрузки зданий из файла: {ex.Message}");
+        }
     }
+
+
+
 
     private GameObject GetBuildingPrefab(Building.BuildingType buildingType, int playerIndex)
     {

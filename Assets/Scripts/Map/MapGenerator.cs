@@ -91,8 +91,6 @@ public class MapGenerator : MonoBehaviour
 
             MarkOccupied(fortress);
         }
-
-        FindObjectOfType<BuildingManager>().Initialize(); // ”казываем завершение инициализации
     }
 
 

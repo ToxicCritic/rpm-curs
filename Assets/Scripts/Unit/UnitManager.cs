@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class UnitManager : MonoBehaviour
@@ -9,11 +10,6 @@ public class UnitManager : MonoBehaviour
     private GameObject tileHighlighterInstance;
     public GameObject moveRangeIndicatorPrefab;
     public GameObject attackRangeIndicatorPrefab;
-
-    public GameObject[] orcUnits;
-    public GameObject[] elfUnits;
-    public GameObject[] humanUnits;
-    public GameObject[] undeadUnits;
 
     private List<GameObject> moveRangeIndicators = new List<GameObject>();
     private List<GameObject> attackRangeIndicators = new List<GameObject>();
@@ -249,64 +245,49 @@ public class UnitManager : MonoBehaviour
         }
     }
 
-    public void SaveUnits()
+    public void SaveUnitsToFile(StreamWriter writer)
     {
-        int unitIndex = 0;
         foreach (var unit in units)
         {
-            PlayerPrefs.SetInt($"Unit{unitIndex}_PlayerIndex", unit.playerIndex);
-            PlayerPrefs.SetInt($"Unit{unitIndex}_UnitIndex", unit.unitIndex); // Индекс типа юнита
-            PlayerPrefs.SetInt($"Unit{unitIndex}_Health", unit.health);
-            PlayerPrefs.SetInt($"Unit{unitIndex}_AttackPower", unit.attackPower);
-            PlayerPrefs.SetFloat($"Unit{unitIndex}_PositionX", unit.transform.position.x);
-            PlayerPrefs.SetFloat($"Unit{unitIndex}_PositionY", unit.transform.position.y);
-            unitIndex++;
+            writer.WriteLine($"{unit.playerIndex},{unit.unitIndex},{unit.health},{unit.maxHealth},{unit.attackPower},{unit.attackRange},{unit.moveRange},{unit.hasMoved},{unit.hasAttacked}");
         }
-        PlayerPrefs.SetInt("UnitCount", unitIndex);
     }
 
-    public void LoadUnits()
-    {
-        int unitCount = PlayerPrefs.GetInt("UnitCount", 0);
-        for (int i = 0; i < unitCount; i++)
-        {
-            int playerIndex = PlayerPrefs.GetInt($"Unit{i}_PlayerIndex");
-            int unitIndex = PlayerPrefs.GetInt($"Unit{i}_UnitIndex");
-            int health = PlayerPrefs.GetInt($"Unit{i}_Health");
-            int attackPower = PlayerPrefs.GetInt($"Unit{i}_AttackPower");
-            float positionX = PlayerPrefs.GetFloat($"Unit{i}_PositionX");
-            float positionY = PlayerPrefs.GetFloat($"Unit{i}_PositionY");
 
-            GameObject unitPrefab = GetUnitPrefab(playerIndex, unitIndex);
-            if (unitPrefab != null)
+
+    // Метод для загрузки юнитов из файла
+    public void LoadUnitsFromFile(string filePath)
+    {
+        using (StreamReader reader = new StreamReader(filePath))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
             {
-                Vector3 position = new Vector3(positionX, positionY, -0.1f);
-                GameObject unitObject = Instantiate(unitPrefab, position, Quaternion.identity);
-                Unit unit = unitObject.GetComponent<Unit>();
-                unit.playerIndex = playerIndex;
-                unit.unitIndex = unitIndex;
-                unit.health = health;
-                unit.attackPower = attackPower;
-                RegisterUnit(unit);
+                string[] data = line.Split(',');
+                if (data.Length < 9)
+                {
+                    Debug.LogError("Invalid unit data format");
+                    continue;
+                }
+
+                Unit unit = new Unit
+                {
+                    playerIndex = int.Parse(data[0]),
+                    unitIndex = int.Parse(data[1]),
+                    health = int.Parse(data[2]),
+                    maxHealth = int.Parse(data[3]),
+                    attackPower = int.Parse(data[4]),
+                    attackRange = int.Parse(data[5]),
+                    moveRange = int.Parse(data[6]),
+                    hasMoved = bool.Parse(data[7]),
+                    hasAttacked = bool.Parse(data[8])
+                };
+
+                units.Add(unit);
             }
         }
+        Debug.Log("Units loaded from file.");
     }
 
-    public GameObject GetUnitPrefab(int playerIndex, int unitIndex)
-    {
-        switch (playerIndex)
-        {
-            case 1:
-                return orcUnits[unitIndex];
-            case 2:
-                return humanUnits[unitIndex];
-            case 3:
-                return undeadUnits[unitIndex];
-            case 4:
-                return elfUnits[unitIndex];
-            default:
-                return null;
-        }
-    }
 
 }

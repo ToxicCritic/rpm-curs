@@ -1,11 +1,11 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
 
 public class PlayerResourceManager : MonoBehaviour
 {
-    public static PlayerResourceManager Instance { get; private set; }
-
+    public int playerIndex;
     public int wood;
     public int stone;
     public int gold;
@@ -16,17 +16,6 @@ public class PlayerResourceManager : MonoBehaviour
 
     private List<Mine> mines = new List<Mine>();
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     private void Start()
     {
@@ -122,4 +111,49 @@ public class PlayerResourceManager : MonoBehaviour
         gold = PlayerPrefs.GetInt($"Player{playerIndex}_Gold", 0);
         UpdateResourceUI();
     }
+
+    public void SaveResourcesToFile(StreamWriter writer)
+    {
+        writer.WriteLine($"{playerIndex},{wood},{stone},{gold}");
+    }
+
+
+    // Метод для загрузки ресурсов игрока из файла
+    public void LoadResourcesFromFile(string filePath)
+    {
+        try
+        {
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] data = line.Split(',');
+
+                    if (data.Length < 4)
+                    {
+                        Debug.LogError("Invalid resource data format");
+                        continue;
+                    }
+
+                    int playerIndex = int.Parse(data[0]);
+                    int wood = int.Parse(data[1]);
+                    int stone = int.Parse(data[2]);
+                    int gold = int.Parse(data[3]);
+
+                    Debug.Log($"Resources for player {playerIndex} loaded: wood={wood}, stone={stone}, gold={gold}");
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+            Debug.LogError($"Error loading resources from file: {ex.Message}");
+        }
+    }
+
+    public string GetResourcesData(int playerIndex)
+    {
+        return $"{playerIndex},{wood},{stone},{gold}";
+    }
+
 }

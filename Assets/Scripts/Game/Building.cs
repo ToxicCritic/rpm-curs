@@ -17,6 +17,9 @@ public class Building : MonoBehaviour
     public int maxHealth;
     public bool hasProducedUnit = false;
 
+    public float positionX;
+    public float positionY;
+
     private BuildingManager buildingManager;
 
     public GameObject fullHealthBarPrefab;

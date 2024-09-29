@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 public class TurnManager : MonoBehaviour
 {
@@ -15,23 +17,35 @@ public class TurnManager : MonoBehaviour
 
     public TMP_Text gameOverText;
     public Image gameOverOutline;
-    
+
     private int currentTurnIndex = 1; // Начинаем с 1
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
 
     private HashSet<int> activePlayers;
+
+    // Константа для пути файла сохранения в папке проекта
+    private static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
+    private static readonly string saveFile = Path.Combine(saveDirectory, "game_save.csv");
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
         activePlayers = new HashSet<int> { 1, 2, 3, 4 }; // Все игроки активны в начале игры
+
+        // Создание папки для сохранений, если она не существует
+        if (!Directory.Exists(saveDirectory))
+        {
+            Directory.CreateDirectory(saveDirectory);
+            Debug.Log($"Save directory created at {saveDirectory}");
+        }
     }
 
     void Start()
@@ -88,7 +102,11 @@ public class TurnManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            SaveGame();
+            if (File.Exists(saveFile))
+            {
+                File.Delete(saveFile);
+            }
+            SaveGameToFile(saveFile);
             // Загрузка сцены главного меню
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
@@ -127,7 +145,7 @@ public class TurnManager : MonoBehaviour
         activePlayers.Remove(playerIndex);
         Debug.Log($"Player {playerNames[playerIndex - 1]} has been deactivated.");
 
-        if (activePlayers.Count == 1) 
+        if (activePlayers.Count == 1)
         {
             gameOverText.text = $"Игра окончена! Победитель: {playerNames[currentTurnIndex - 1]}";
             gameOverOutline.gameObject.SetActive(true);
@@ -138,27 +156,111 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    public void SaveGame()
+    // Метод для сохранения игры в файл
+    public void SaveGameToFile(string filePath)
     {
-        PlayerPrefs.SetInt("CurrentTurnIndex", currentTurnIndex);
-        for (int i = 0; i < unitManagers.Count; i++)
+        try
         {
-            unitManagers[i].SaveUnits();
-            playerResourceManagers[i].SavePlayerResources(i + 1);
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                // Сохранение текущего индекса хода
+                writer.WriteLine($"CurrentTurnIndex,{currentTurnIndex}");
+
+                // Сохранение активных игроков
+                writer.WriteLine($"ActivePlayers,{string.Join(",", activePlayers)}");
+
+// Сохранение данных юнитов через UnitManager
+                foreach (var unitManager in unitManagers)
+                {
+                    writer.Write("UnitData,");
+                    unitManager.SaveUnitsToFile(writer);
+                }
+
+                // Сохранение данных ресурсов через PlayerResourceManager
+
+                foreach (var resourceManager in playerResourceManagers)
+                {
+                    writer.Write("ResourceData,");
+                    resourceManager.SaveResourcesToFile(writer);
+                }
+
+                // Сохранение данных зданий через BuildingManager
+                buildingManager.SaveBuildingsToFile(writer);
+            }
+
+            Debug.Log("Game saved to " + filePath);
         }
-        buildingManager.SaveBuildings();
-        PlayerPrefs.Save();
+        catch (IOException ex)
+        {
+            Debug.LogError($"Error saving game to file: {ex.Message}");
+        }
     }
 
-    public void LoadGame()
+    // Метод для загрузки игры из файла
+    public void LoadGameFromFile(string filePath)
     {
-        currentTurnIndex = PlayerPrefs.GetInt("CurrentTurnIndex", 1);
-        for (int i = 0; i < unitManagers.Count; i++)
+        if (!File.Exists(filePath))
         {
-            unitManagers[i].LoadUnits();
-            playerResourceManagers[i].LoadPlayerResources(i + 1);
+            Debug.LogError("Save file not found at " + filePath);
+            return;
         }
-        buildingManager.LoadBuildings();
+
+        using (StreamReader reader = new StreamReader(filePath))
+        {
+            string line;
+            bool readingUnits = false, readingResources = false, readingBuildings = false;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                string[] data = line.Split(',');
+
+                switch (data[0])
+                {
+                    case "CurrentTurnIndex":
+                        currentTurnIndex = int.Parse(data[1]);
+                        break;
+                    case "ActivePlayers":
+                        activePlayers = new HashSet<int>(data[1].Split(',').Select(int.Parse));
+                        break;
+                    case "UnitData":
+                        readingUnits = true;
+                        readingResources = false;
+                        readingBuildings = false;
+                        break;
+                    case "ResourceData":
+                        readingUnits = false;
+                        readingResources = true;
+                        readingBuildings = false;
+                        break;
+                    case "BuildingData":
+                        readingUnits = false;
+                        readingResources = false;
+                        readingBuildings = true;
+                        break;
+                    default:
+                        if (readingUnits)
+                        {
+                            // Загрузка данных юнитов
+                            int playerIndex = int.Parse(data[0]);
+                            unitManagers[playerIndex - 1].LoadUnitsFromFile(filePath);
+                        }
+                        else if (readingResources)
+                        {
+                            // Загрузка данных ресурсов
+                            int playerIndex = int.Parse(data[0]);
+                            playerResourceManagers[playerIndex - 1].LoadResourcesFromFile(filePath);
+                        }
+                        else if (readingBuildings)
+                        {
+                            // Загрузка данных зданий
+                            buildingManager.LoadBuildingsFromFile(filePath);
+                        }
+                        break;
+                }
+            }
+        }
+
         UpdateTurnText();
+        Debug.Log("Game loaded from " + filePath);
     }
 }
