@@ -97,63 +97,23 @@ public class PlayerResourceManager : MonoBehaviour
         UpdateResourceUI();
     }
 
-    public void SavePlayerResources(int playerIndex)
-    {
-        PlayerPrefs.SetInt($"Player{playerIndex}_Wood", wood);
-        PlayerPrefs.SetInt($"Player{playerIndex}_Stone", stone);
-        PlayerPrefs.SetInt($"Player{playerIndex}_Gold", gold);
-    }
-
-    public void LoadPlayerResources(int playerIndex)
-    {
-        wood = PlayerPrefs.GetInt($"Player{playerIndex}_Wood", 0);
-        stone = PlayerPrefs.GetInt($"Player{playerIndex}_Stone", 0);
-        gold = PlayerPrefs.GetInt($"Player{playerIndex}_Gold", 0);
-        UpdateResourceUI();
-    }
-
-    public void SaveResourcesToFile(StreamWriter writer)
-    {
-        writer.WriteLine($"{playerIndex},{wood},{stone},{gold}");
-    }
-
-
-    // Метод для загрузки ресурсов игрока из файла
-    public void LoadResourcesFromFile(string filePath)
-    {
-        try
-        {
-            using (StreamReader reader = new StreamReader(filePath))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    string[] data = line.Split(',');
-
-                    if (data.Length < 4)
-                    {
-                        Debug.LogError("Invalid resource data format");
-                        continue;
-                    }
-
-                    int playerIndex = int.Parse(data[0]);
-                    int wood = int.Parse(data[1]);
-                    int stone = int.Parse(data[2]);
-                    int gold = int.Parse(data[3]);
-
-                    Debug.Log($"Resources for player {playerIndex} loaded: wood={wood}, stone={stone}, gold={gold}");
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            Debug.LogError($"Error loading resources from file: {ex.Message}");
-        }
-    }
-
     public string GetResourcesData(int playerIndex)
     {
         return $"{playerIndex},{wood},{stone},{gold}";
     }
 
+    public void LoadPlayerResources(string[] data)
+    {
+        if (data.Length >= 4) // Проверяем, что данных достаточно для загрузки
+        {
+            playerIndex = int.Parse(data[1]);
+            gold = int.Parse(data[2]);
+            wood = int.Parse(data[3]);
+            stone = int.Parse(data[4]);
+        }
+        else
+        {
+            Debug.LogError("Недостаточно данных для загрузки ресурсов игрока.");
+        }
+    }
 }

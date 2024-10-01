@@ -67,7 +67,7 @@ public class UnitPanelManager : MonoBehaviour
         }
     }
 
-    private void CreateUnit(int index)
+    public void CreateUnit(int index) 
     {
         PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
         GameObject unitPrefab = unitCreation.GetAvailableUnits()[index];

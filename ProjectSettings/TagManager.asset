@@ -7,6 +7,9 @@ TagManager:
   - FortressPart
   - Resource
   - Building
+  - Stone
+  - Tree
+  - Tile
   layers:
   - Default
   - TransparentFX

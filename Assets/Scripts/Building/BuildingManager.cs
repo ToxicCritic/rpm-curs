@@ -191,6 +191,48 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    public bool CreateBuilding(int buildingIndex, Vector3Int gridPosition)
+    {
+        // Проверка на возможность установки здания
+        if (CanPlaceBuilding(gridPosition) && IsWithinMapBounds(gridPosition) && IsInPlayerQuarter(gridPosition))
+        {
+            // Получаем префаб здания
+            GameObject buildingPrefab = currentBuildings[buildingIndex];
+            BuildingCost cost = buildingPrefab.GetComponent<BuildingCost>();
+            PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
+
+            // Проверяем, хватает ли ресурсов
+            if (currentPlayerResourceManager.CanAfford(cost.wood, cost.stone, 0))
+            {
+                // Списываем ресурсы
+                currentPlayerResourceManager.SpendResource("wood", cost.wood);
+                currentPlayerResourceManager.SpendResource("stone", cost.stone);
+
+                // Создаем здание
+                Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
+                GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
+                Building building = buildingObject.GetComponent<Building>();
+                building.positionX = spawnPosition.x;
+                building.positionY = spawnPosition.y;
+
+                // Регистрируем здание
+                RegisterBuilding(building);
+
+                return true; // Успешное создание здания
+            }
+            else
+            {
+                Debug.Log("Not enough resources to place building.");
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot place building.");
+        }
+
+        return false; // Ошибка создания здания
+    }
+
 
     void CancelBuildingPlacement()
     {
@@ -331,7 +373,6 @@ public class BuildingManager : MonoBehaviour
 
     public void SaveBuildingsToFile(StreamWriter writer)
     {
-
         foreach (var building in playerBuildings)
         {
             writer.Write("BuildingData,");
@@ -340,50 +381,50 @@ public class BuildingManager : MonoBehaviour
     }
 
 
-    // Метод для загрузки зданий из файла
-    public void LoadBuildingsFromFile(string filePath)
+    public void LoadBuildingsFromFile(StreamReader reader, string[] data)
     {
         try
         {
-            using (StreamReader reader = new StreamReader(filePath))
+            string line;
+            while ((line = reader.ReadLine()) != null)
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                data = line.Split(',');
+
+                if (data[0] == "BuildingData")
                 {
-                    // Предположим, что данные здания разделены запятыми в строке
-                    string[] data = line.Split(',');
+                    BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[1]);
+                    int playerIndex = int.Parse(data[2]);
+                    int health = int.Parse(data[3]);
+                    int maxHealth = int.Parse(data[4]);
+                    bool hasProducedUnit = bool.Parse(data[5]);
+                    float positionX = float.Parse(data[6]);
+                    float positionY = float.Parse(data[7]);
 
-                    BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[0]);
-                    int playerIndex = int.Parse(data[1]);
-                    int health = int.Parse(data[2]);
-                    int maxHealth = int.Parse(data[3]);
-                    float positionX = float.Parse(data[4]);
-                    float positionY = float.Parse(data[5]);
+                    // Переключаемся на нужного игрока
+                    SetPlayer(playerIndex);
 
-                    // Создаем здание в игре на основе этих данных
-                    GameObject buildingPrefab = GetBuildingPrefab(buildingType, playerIndex); // Метод для получения префаба по типу
-                    Vector3 spawnPosition = new Vector3(positionX, positionY, -0.1f);
-                    GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
-                    Building building = buildingObject.GetComponent<Building>();
+                    // Используем метод CreateBuilding для создания здания
+                    Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
+                    bool success = CreateBuilding((int)buildingType, gridPosition);
 
-                    building.playerIndex = playerIndex;
-                    building.health = health;
-                    building.maxHealth = maxHealth;
-                    building.positionX = positionX;
-                    building.positionY = positionY;
-
-                    // Зарегистрировать здание в BuildingManager
-                    RegisterBuilding(building);
+                    if (success)
+                    {
+                        // Получаем созданное здание и устанавливаем его параметры
+                        Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
+                        createdBuilding.health = health;
+                        createdBuilding.maxHealth = maxHealth;
+                        createdBuilding.hasProducedUnit = hasProducedUnit;
+                        createdBuilding.positionX = positionX;
+                        createdBuilding.positionY = positionY;
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Ошибка загрузки зданий из файла: {ex.Message}");
+            Debug.LogError($"Ошибка загрузки зданий: {ex.Message}");
         }
     }
-
-
 
 
     private GameObject GetBuildingPrefab(Building.BuildingType buildingType, int playerIndex)

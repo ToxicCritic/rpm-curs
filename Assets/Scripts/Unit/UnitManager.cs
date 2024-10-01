@@ -10,6 +10,7 @@ public class UnitManager : MonoBehaviour
     private GameObject tileHighlighterInstance;
     public GameObject moveRangeIndicatorPrefab;
     public GameObject attackRangeIndicatorPrefab;
+    public GameObject[][] playerUnitPrefabs;
 
     private List<GameObject> moveRangeIndicators = new List<GameObject>();
     private List<GameObject> attackRangeIndicators = new List<GameObject>();
@@ -23,6 +24,14 @@ public class UnitManager : MonoBehaviour
         units = new List<Unit>();
         tileHighlighterInstance = Instantiate(tileHighlighterPrefab);
         tileHighlighterInstance.SetActive(false);
+
+        playerUnitPrefabs = new GameObject[4][];
+
+        // Загружаем префабы для каждой фракции
+        playerUnitPrefabs[0] = LoadUnitPrefabsForFaction("Orc");
+        playerUnitPrefabs[1] = LoadUnitPrefabsForFaction("Human");
+        playerUnitPrefabs[2] = LoadUnitPrefabsForFaction("Undead");
+        playerUnitPrefabs[3] = LoadUnitPrefabsForFaction("Elf");
     }
 
     void Update()
@@ -249,45 +258,133 @@ public class UnitManager : MonoBehaviour
     {
         foreach (var unit in units)
         {
-            writer.WriteLine($"{unit.playerIndex},{unit.unitIndex},{unit.health},{unit.maxHealth},{unit.attackPower},{unit.attackRange},{unit.moveRange},{unit.hasMoved},{unit.hasAttacked}");
+            writer.WriteLine($"UnitData,{unit.unitIndex},{unit.playerIndex},{unit.transform.position.x},{unit.transform.position.y},{unit.health},{unit.maxHealth},{unit.attackPower},{unit.attackRange},{unit.moveRange},{unit.hasMoved},{unit.hasAttacked}");
         }
     }
 
-
-
-    // Метод для загрузки юнитов из файла
-    public void LoadUnitsFromFile(string filePath)
+    public void LoadUnitsFromFile(StreamReader reader, string[] data)
     {
-        using (StreamReader reader = new StreamReader(filePath))
+        try
         {
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.Peek() >= 0)
             {
-                string[] data = line.Split(',');
-                if (data.Length < 9)
+                string line = reader.ReadLine();
+                if (line == null) break;
+
+                data = line.Split(',');
+
+                if (data[0] == "UnitData")
                 {
-                    Debug.LogError("Invalid unit data format");
-                    continue;
+                    int playerIndex = int.Parse(data[1]);
+                    int unitIndex = int.Parse(data[2]);
+                    int health = int.Parse(data[3]);
+                    int maxHealth = int.Parse(data[4]);
+                    int attackPower = int.Parse(data[5]);
+                    int attackRange = int.Parse(data[6]);
+                    int moveRange = int.Parse(data[7]);
+                    bool hasMoved = bool.Parse(data[8]);
+                    bool hasAttacked = bool.Parse(data[9]);
+                    float positionX = float.Parse(data[10]);
+                    float positionY = float.Parse(data[11]);
+
+                    // Устанавливаем тайл на карте
+                    Vector3 unitPosition = new Vector3(positionX, positionY, 0);
+
+                    // Получаем префаб на основе индекса игрока и юнита
+                    GameObject unitPrefab = playerUnitPrefabs[playerIndex][unitIndex];
+
+                    if (unitPrefab != null)
+                    {
+                        // Создаем юнита на карте
+                        GameObject newUnit = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
+
+                        // Получаем компонент Unit и инициализируем его
+                        Unit unitComponent = newUnit.GetComponent<Unit>();
+                        if (unitComponent != null)
+                        {
+                            unitComponent.playerIndex = playerIndex;
+                            unitComponent.unitIndex = unitIndex;
+                            unitComponent.health = health;
+                            unitComponent.maxHealth = maxHealth;
+                            unitComponent.attackPower = attackPower;
+                            unitComponent.attackRange = attackRange;
+                            unitComponent.moveRange = moveRange;
+                            unitComponent.hasMoved = hasMoved;
+                            unitComponent.hasAttacked = hasAttacked;
+
+                            Debug.Log($"Юнит загружен на позиции ({positionX}, {positionY}) для игрока {playerIndex}.");
+                        }
+                        else
+                        {
+                            Debug.LogError("Компонент Unit не найден у созданного объекта.");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError($"Префаб для игрока {playerIndex} и юнита {unitIndex} не найден.");
+                    }
                 }
-
-                Unit unit = new Unit
-                {
-                    playerIndex = int.Parse(data[0]),
-                    unitIndex = int.Parse(data[1]),
-                    health = int.Parse(data[2]),
-                    maxHealth = int.Parse(data[3]),
-                    attackPower = int.Parse(data[4]),
-                    attackRange = int.Parse(data[5]),
-                    moveRange = int.Parse(data[6]),
-                    hasMoved = bool.Parse(data[7]),
-                    hasAttacked = bool.Parse(data[8])
-                };
-
-                units.Add(unit);
             }
         }
-        Debug.Log("Units loaded from file.");
+        catch (Exception ex)
+        {
+            Debug.LogError($"Ошибка загрузки юнитов: {ex.Message}");
+        }
     }
 
+    public void CreateUnit(int unitIndex, int playerIndex, Vector3 position, int health, int maxHealth, int attackPower, int attackRange, int moveRange, bool hasMoved, bool hasAttacked)
+    {
+        GameObject unitPrefab = GetUnitPrefab(playerIndex, unitIndex); // Определяем префаб по индексу игрока и юнита
+        if (unitPrefab != null)
+        {
+            GameObject unit = Instantiate(unitPrefab, position, Quaternion.identity);
+            Unit unitComponent = unit.GetComponent<Unit>();
 
+            unitComponent.playerIndex = playerIndex;
+            unitComponent.unitIndex = unitIndex;
+            unitComponent.health = health;
+            unitComponent.maxHealth = maxHealth;
+            unitComponent.attackPower = attackPower;
+            unitComponent.attackRange = attackRange;
+            unitComponent.moveRange = moveRange;
+            unitComponent.hasMoved = hasMoved;
+            unitComponent.hasAttacked = hasAttacked;
+
+            units.Add(unitComponent); // Добавляем юнита в список
+        }
+        else
+        {
+            Debug.LogError($"Не удалось найти префаб для playerIndex {playerIndex} и unitIndex {unitIndex}");
+        }
+    }
+
+    public GameObject GetUnitPrefab(int playerIndex, int unitIndex)
+    {
+        if (playerIndex < playerUnitPrefabs.Length && unitIndex < playerUnitPrefabs[playerIndex].Length)
+        {
+            return playerUnitPrefabs[playerIndex][unitIndex];
+        }
+        Debug.LogError($"Не найден префаб для playerIndex {playerIndex} и unitIndex {unitIndex}");
+        return null;
+    }
+
+    private GameObject[] LoadUnitPrefabsForFaction(string factionName)
+    {
+        GameObject[] unitPrefabs = new GameObject[4];
+
+        // Загружаем префабы юнитов из папки Resources/Prefabs/Troops/<factionName>/
+        for (int i = 0; i < 4; i++)
+        {
+            string path = $"Prefabs/Troops/{factionName}/{factionName}{i}";
+            unitPrefabs[i] = Resources.Load<GameObject>(path);
+
+            // Проверяем, загрузился ли префаб успешно
+            if (unitPrefabs[i] == null)
+            {
+                Debug.LogError($"Не удалось загрузить префаб по пути: {path}");
+            }
+        }
+
+        return unitPrefabs;
+    }
 }

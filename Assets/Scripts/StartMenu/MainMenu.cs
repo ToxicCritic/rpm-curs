@@ -2,17 +2,17 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.IO;
+using System.Collections;
 
 public class MainMenu : MonoBehaviour
 {
-    public Button continueButton; 
+    public Button continueButton;
 
     private static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
     private static readonly string saveFile = Path.Combine(saveDirectory, "game_save.csv");
 
     void Start()
     {
-        // Проверяем, существует ли сохранение, и активируем кнопку "Продолжить", если оно есть
         if (File.Exists(saveFile))
         {
             continueButton.interactable = true;
@@ -32,18 +32,18 @@ public class MainMenu : MonoBehaviour
             File.Delete(saveFile);
             Debug.Log("Existing save file deleted. Starting new game.");
         }
-
-        SceneManager.LoadScene("RaceSelector");
+        SceneManager.LoadScene("GameScene");
     }
 
     public void ContinueGame()
     {
-        // Проверка наличия сохраненной игры
         if (File.Exists(saveFile))
         {
-
-            TurnManager.Instance.LoadGameFromFile(saveFile);
+            // Загружаем игровую сцену
             SceneManager.LoadScene("GameScene");
+
+            // После загрузки сцены загружаем данные
+            StartCoroutine(LoadGameAfterSceneLoaded());
         }
         else
         {
@@ -51,11 +51,17 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void ViewStatistics()
+    private IEnumerator LoadGameAfterSceneLoaded()
     {
-        // Загрузите сцену или откройте окно со статистикой
-        Debug.Log("View Statistics button pressed!");
-        // Здесь вы можете добавить загрузку сцены или функциональность для отображения статистики
+        // Ждем, пока сцена полностью загрузится
+        yield return new WaitForSeconds(1f);
+
+        // Загружаем сохраненную игру
+        SaveManager saveManager = FindObjectOfType<SaveManager>();
+        if (saveManager != null)
+        {
+            saveManager.LoadGame();
+        }
     }
 
     public void QuitGame()
