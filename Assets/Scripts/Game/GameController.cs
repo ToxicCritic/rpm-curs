@@ -3,6 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
+    private void Start()
+    {
+        SaveManager.Instance.LoadGame();
+    }
     void Update()
     {
         // Проверяем, нажата ли клавиша F1

@@ -23,22 +23,28 @@ public class MapGenerator : MonoBehaviour
     public GameObject humanFortressPrefab;
     public GameObject undeadFortressPrefab;
 
-    public int mapWidth = 30;
-    public int mapHeight = 30;
+    public static int mapWidth = 28;
+    public static int mapHeight = 28;
     public float treeProbability = 0.05f;
     public float rockProbability = 0.05f;
 
-    private GameObject[,] gridObjects;
+    private GameObject[,] gridObjects = new GameObject[mapWidth, mapHeight];
     private BuildingManager buildingManager;
+
+    private static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
+    private static readonly string saveFile = Path.Combine(saveDirectory, "game_save.csv");
+
 
     void Start()
     {
         gridObjects = new GameObject[mapWidth, mapHeight];
         buildingManager = FindObjectOfType<BuildingManager>();
-
-        GenerateMap();
-        SpawnFortresses();
-        SpawnResources();
+        if (!File.Exists(saveFile))
+        {
+            GenerateMap();
+            SpawnFortresses();
+            SpawnResources();
+        }
     }
 
     public void GenerateMap()
@@ -112,12 +118,46 @@ public class MapGenerator : MonoBehaviour
         foreach (Transform child in fortress.transform)
         {
             Vector3Int gridPosition = Vector3Int.FloorToInt(child.position - new Vector3(0.5f, 0.5f, 0));
+
             if (IsValidGridPosition(gridPosition))
             {
-                gridObjects[gridPosition.x, gridPosition.y] = fortress;
+                // Занимаем центральную клетку
+                MarkTileAsOccupied(gridPosition, fortress);
+
+                // Занимаем клетки слева, сверху и слева сверху
+                Vector3Int topPosition = new Vector3Int(gridPosition.x, gridPosition.y + 1, gridPosition.z);
+                Vector3Int leftPosition = new Vector3Int(gridPosition.x - 1, gridPosition.y, gridPosition.z);
+                Vector3Int topLeftPosition = new Vector3Int(gridPosition.x - 1, gridPosition.y + 1, gridPosition.z);
+
+                MarkTileAsOccupied(topPosition, fortress);
+                MarkTileAsOccupied(leftPosition, fortress);
+                MarkTileAsOccupied(topLeftPosition, fortress);
             }
         }
     }
+
+    // Метод для установки крепости как дочернего объекта клетки и отметки ее как занятой
+    void MarkTileAsOccupied(Vector3Int position, GameObject fortress)
+    {
+        if (IsValidGridPosition(position))
+        {
+            GameObject tile = gridObjects[position.x, position.y];
+
+            if (tile != null)
+            {
+                // Устанавливаем крепость как дочерний объект тайла
+                fortress.transform.parent = tile.transform;
+
+                Debug.Log($"Fortress placed on tile at {position.x},{position.y}.");
+            }
+            else
+            {
+                Debug.LogWarning($"No tile found at {position.x},{position.y} to place the fortress!");
+            }
+        }
+    }
+
+
 
     void SpawnResources()
     {
@@ -143,41 +183,6 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    void SaveMapState(string filePath)
-    {
-        using (StreamWriter writer = new StreamWriter(filePath))
-        {
-            // Сохраняем тайлы карты
-            SaveTilesToFile(writer);
-
-            // Сохраняем ресурсы карты
-            SaveResourcesToFile(writer);
-        }
-    }
-
-    void LoadMapState(string filePath)
-    {
-        using (StreamReader reader = new StreamReader(filePath))
-        {
-            string line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                string[] data = line.Split(',');
-
-                // Определяем, что именно загружаем (тайл или ресурс)
-                if (data[0] == "Tile")
-                {
-                    LoadTilesFromFile(reader, data);
-                }
-                else if (data[0] == "Resource")
-                {
-                    LoadResourcesFromFile(reader, data);
-                }
-            }
-        }
-    }
-
-
     public void SaveResourcesToFile(StreamWriter writer)
     {
         for (int x = 0; x < mapWidth; x++)
@@ -192,17 +197,17 @@ public class MapGenerator : MonoBehaviour
 
                     if (resourceTransform != null)
                     {
-                        string resourceType = resourceTransform.gameObject.tag; // Предполагаем, что ресурсы имеют теги "Tree" или "Rock"
+                        string resourceType = resourceTransform.gameObject.tag; // Получаем тег ресурса
                         string race = ""; // Определяем принадлежность к расе
 
-                        // Определяем принадлежность ресурса к расе
-                        if (resourceTransform.gameObject == orcTree || resourceTransform.gameObject == orcRock)
+                        // Определяем принадлежность ресурса к расе на основе тега
+                        if (resourceType.Contains("orc"))
                             race = "Orc";
-                        else if (resourceTransform.gameObject == elfTree || resourceTransform.gameObject == elfRock)
+                        else if (resourceType.Contains("elf"))
                             race = "Elf";
-                        else if (resourceTransform.gameObject == humanTree || resourceTransform.gameObject == humanRock)
+                        else if (resourceType.Contains("human"))
                             race = "Human";
-                        else if (resourceTransform.gameObject == undeadTree || resourceTransform.gameObject == undeadRock)
+                        else if (resourceType.Contains("undead"))
                             race = "Undead";
 
                         // Сохраняем информацию о ресурсе в файл
@@ -213,7 +218,8 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void LoadResourcesFromFile(StreamReader reader, string[] data)
+
+    public void LoadResourcesFromFile(string[] data)
     {
         string resourceType = data[1]; // Тип ресурса (Tree или Rock)
         string race = data[2];         // Принадлежность к расе (Orc, Elf, Human, Undead)
@@ -226,19 +232,19 @@ public class MapGenerator : MonoBehaviour
         // Определяем префаб в зависимости от расы и типа ресурса
         if (race == "Orc")
         {
-            prefab = (resourceType == "Tree") ? orcTree : orcRock;
+            prefab = (resourceType == "orcTree") ? orcTree : orcRock;
         }
         else if (race == "Elf")
         {
-            prefab = (resourceType == "Tree") ? elfTree : elfRock;
+            prefab = (resourceType == "elfTree") ? elfTree : elfRock;
         }
         else if (race == "Human")
         {
-            prefab = (resourceType == "Tree") ? humanTree : humanRock;
+            prefab = (resourceType == "humanTree") ? humanTree : humanRock;
         }
         else if (race == "Undead")
         {
-            prefab = (resourceType == "Tree") ? undeadTree : undeadRock;
+            prefab = (resourceType == "undeadTree") ? undeadTree : undeadRock;
         }
 
         // Создаем объект ресурса на карте
@@ -296,7 +302,7 @@ public class MapGenerator : MonoBehaviour
         return false;
     }
 
-    public void LoadTilesFromFile(StreamReader reader, string[] data)
+    public void LoadTilesFromFile(string[] data)
     {
         string tileType = data[1];  // Тип тайла (OrcTile, ElfTile, HumanTile, UndeadTile)
         int tileIndex = int.Parse(data[2]); // Индекс тайла в массиве

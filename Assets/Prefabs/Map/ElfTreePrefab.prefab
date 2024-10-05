@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6559874004315386174}
   m_Layer: 6
   m_Name: ElfTreePrefab
-  m_TagString: Tree
+  m_TagString: elfTree
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

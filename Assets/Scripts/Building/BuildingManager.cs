@@ -381,45 +381,36 @@ public class BuildingManager : MonoBehaviour
     }
 
 
-    public void LoadBuildingsFromFile(StreamReader reader, string[] data)
+    public void LoadBuildingsFromFile(string[] data)
     {
         try
         {
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[1]);
+            int playerIndex = int.Parse(data[2]);
+            int health = int.Parse(data[3]);
+            int maxHealth = int.Parse(data[4]);
+            bool hasProducedUnit = bool.Parse(data[5]);
+            float positionX = float.Parse(data[6]);
+            float positionY = float.Parse(data[7]);
+
+            // Переключаемся на нужного игрока
+            SetPlayer(playerIndex);
+
+            // Используем метод CreateBuilding для создания здания
+            Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
+            bool success = CreateBuilding((int)buildingType, gridPosition);
+
+            if (success)
             {
-                data = line.Split(',');
-
-                if (data[0] == "BuildingData")
-                {
-                    BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[1]);
-                    int playerIndex = int.Parse(data[2]);
-                    int health = int.Parse(data[3]);
-                    int maxHealth = int.Parse(data[4]);
-                    bool hasProducedUnit = bool.Parse(data[5]);
-                    float positionX = float.Parse(data[6]);
-                    float positionY = float.Parse(data[7]);
-
-                    // Переключаемся на нужного игрока
-                    SetPlayer(playerIndex);
-
-                    // Используем метод CreateBuilding для создания здания
-                    Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
-                    bool success = CreateBuilding((int)buildingType, gridPosition);
-
-                    if (success)
-                    {
-                        // Получаем созданное здание и устанавливаем его параметры
-                        Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
-                        createdBuilding.health = health;
-                        createdBuilding.maxHealth = maxHealth;
-                        createdBuilding.hasProducedUnit = hasProducedUnit;
-                        createdBuilding.positionX = positionX;
-                        createdBuilding.positionY = positionY;
-                    }
-                }
+                // Получаем созданное здание и устанавливаем его параметры
+                Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
+                createdBuilding.health = health;
+                createdBuilding.maxHealth = maxHealth;
+                createdBuilding.hasProducedUnit = hasProducedUnit;
+                createdBuilding.positionX = positionX;
+                createdBuilding.positionY = positionY;
             }
-        }
+        }          
         catch (Exception ex)
         {
             Debug.LogError($"Ошибка загрузки зданий: {ex.Message}");

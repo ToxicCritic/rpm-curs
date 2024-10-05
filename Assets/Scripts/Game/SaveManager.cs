@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SaveManager : MonoBehaviour
 {
-    private static SaveManager instance;
+    public static SaveManager Instance { get; private set; }
 
     private MapGenerator mapGenerator;
     private GameResourceManager gameResourceManager;
@@ -16,29 +17,70 @@ public class SaveManager : MonoBehaviour
 
     private void Start()
     {
-        mapGenerator = FindObjectOfType<MapGenerator>();
-        gameResourceManager = FindObjectOfType<GameResourceManager>();
-        buildingManager = FindObjectOfType<BuildingManager>();
-        unitManager = FindObjectOfType<UnitManager>();
+        // При запуске игры обновляем ссылки на менеджеры
+        InitializeManagers();
 
         saveDirectory = Path.Combine(Application.dataPath, "Saves");
         saveFilePath = Path.Combine(saveDirectory, "game_save.csv");
 
-        CreateSaveFileIfNotExists();
     }
 
     private void Awake()
     {
         // Проверка на наличие уже существующего экземпляра
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);  // Сохраняем объект между сценами
         }
         else
         {
             Destroy(gameObject);  // Уничтожаем дубликат, если уже существует экземпляр
         }
+
+        // Подписываемся на событие загрузки новой сцены
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        // Отписываемся от события при уничтожении объекта
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // При каждой загрузке новой сцены обновляем ссылки на менеджеры
+        InitializeManagers();
+    }
+
+    // Метод для обновления ссылок на менеджеры
+    public void InitializeManagers()
+    {
+        mapGenerator = FindObjectOfType<MapGenerator>();
+        gameResourceManager = FindObjectOfType<GameResourceManager>();
+        buildingManager = FindObjectOfType<BuildingManager>();
+        unitManager = FindObjectOfType<UnitManager>();
+
+        if (mapGenerator == null || gameResourceManager == null || buildingManager == null || unitManager == null)
+        {
+            Debug.LogWarning("Не удалось найти все менеджеры на сцене!");
+        }
+        else
+        {
+            Debug.Log("Все менеджеры успешно инициализированы.");
+        }
+    }
+
+    // Метод для сброса ссылок на менеджеры (при переходе в главное меню или сохранении игры)
+    public void ResetManagerReferences()
+    {
+        mapGenerator = null;
+        gameResourceManager = null;
+        buildingManager = null;
+        unitManager = null;
+
+        Debug.Log("Ссылки на менеджеры сброшены.");
     }
 
     private void CreateSaveFileIfNotExists()
@@ -53,28 +95,43 @@ public class SaveManager : MonoBehaviour
         if (!File.Exists(saveFilePath))
         {
             // Создаем файл, если его нет
-            File.Create(saveFilePath);
-            Debug.Log("Save file created: " + saveFilePath);
+            File.Create(saveFilePath).Close(); // Закрываем поток после создания файла
+            Debug.Log("Файл сохранения создан: " + saveFilePath);
         }
     }
 
     public void SaveGame()
     {
+        CreateSaveFileIfNotExists();
+
         using (StreamWriter writer = new StreamWriter(saveFilePath))
         {
             // Сохранение карты (тайлы и ресурсы)
-            mapGenerator.SaveTilesToFile(writer);
-            mapGenerator.SaveResourcesToFile(writer);
+            if (mapGenerator != null)
+            {
+                mapGenerator.SaveTilesToFile(writer);
+                mapGenerator.SaveResourcesToFile(writer);
+            }
 
             // Сохранение всех ресурсов
-            gameResourceManager.SavePlayerResources(writer);
+            if (gameResourceManager != null)
+            {
+                gameResourceManager.SavePlayerResources(writer);
+            }
 
             // Сохранение зданий
-            buildingManager.SaveBuildingsToFile(writer);
+            if (buildingManager != null)
+            {
+                buildingManager.SaveBuildingsToFile(writer);
+            }
 
             // Сохранение юнитов
-            unitManager.SaveUnitsToFile(writer);
+            if (unitManager != null)
+            {
+                unitManager.SaveUnitsToFile(writer);
+            }
         }
+        ResetManagerReferences();
 
         Debug.Log("Игра сохранена в файл: " + saveFilePath);
     }
@@ -97,19 +154,34 @@ public class SaveManager : MonoBehaviour
                 switch (data[0])
                 {
                     case "Tile":
-                        mapGenerator.LoadTilesFromFile(reader, data);
+                        if (mapGenerator != null)
+                        {
+                            mapGenerator.LoadTilesFromFile(data);
+                        }
                         break;
                     case "Resource":
-                        mapGenerator.LoadResourcesFromFile(reader, data);
+                        if (mapGenerator != null)
+                        {
+                            mapGenerator.LoadResourcesFromFile(data);
+                        }
                         break;
                     case "PlayerResources":
-                        gameResourceManager.LoadPlayerResources(reader, data);
+                        if (gameResourceManager != null)
+                        {
+                            gameResourceManager.LoadPlayerResources(data);
+                        }
                         break;
                     case "BuildingData":
-                        buildingManager.LoadBuildingsFromFile(reader, data);
+                        if (buildingManager != null)
+                        {
+                            buildingManager.LoadBuildingsFromFile(data);
+                        }
                         break;
                     case "UnitData":
-                        unitManager.LoadUnitsFromFile(reader, data);
+                        if (unitManager != null)
+                        {
+                            unitManager.LoadUnitsFromFile(data);
+                        }
                         break;
                 }
             }

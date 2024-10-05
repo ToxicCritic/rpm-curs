@@ -13,7 +13,7 @@ public class GameResourceManager : MonoBehaviour
         }
     }
 
-    public void LoadPlayerResources(StreamReader reader, string[] data)
+    public void LoadPlayerResources(string[] data)
     {
         int playerIndex = int.Parse(data[1]);
         foreach (var playerResourceManager in playerResourceManagers)

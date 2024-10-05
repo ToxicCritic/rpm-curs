@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1886258941924930163}
   m_Layer: 6
   m_Name: OrcStone
-  m_TagString: Stone
+  m_TagString: orcRock
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

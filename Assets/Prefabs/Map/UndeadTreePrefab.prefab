@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7319021070308204263}
   m_Layer: 6
   m_Name: UndeadTreePrefab
-  m_TagString: Tree
+  m_TagString: undeadTree
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

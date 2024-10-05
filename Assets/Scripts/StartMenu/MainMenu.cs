@@ -13,6 +13,7 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+        // Проверяем, существует ли файл сохранения
         if (File.Exists(saveFile))
         {
             continueButton.interactable = true;
@@ -32,6 +33,8 @@ public class MainMenu : MonoBehaviour
             File.Delete(saveFile);
             Debug.Log("Existing save file deleted. Starting new game.");
         }
+
+        // Загружаем игровую сцену
         SceneManager.LoadScene("GameScene");
     }
 
@@ -42,7 +45,7 @@ public class MainMenu : MonoBehaviour
             // Загружаем игровую сцену
             SceneManager.LoadScene("GameScene");
 
-            // После загрузки сцены загружаем данные
+            // После загрузки сцены загружаем сохраненные данные
             StartCoroutine(LoadGameAfterSceneLoaded());
         }
         else
@@ -53,14 +56,19 @@ public class MainMenu : MonoBehaviour
 
     private IEnumerator LoadGameAfterSceneLoaded()
     {
-        // Ждем, пока сцена полностью загрузится
-        yield return new WaitForSeconds(1f);
+        // Ждем завершения загрузки сцены
+        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "GameScene");
 
-        // Загружаем сохраненную игру
+        // Находим SaveManager на сцене
         SaveManager saveManager = FindObjectOfType<SaveManager>();
         if (saveManager != null)
         {
+            // Загружаем данные
             saveManager.LoadGame();
+        }
+        else
+        {
+            Debug.LogError("SaveManager не найден на сцене!");
         }
     }
 

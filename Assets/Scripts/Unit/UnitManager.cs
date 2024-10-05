@@ -262,67 +262,59 @@ public class UnitManager : MonoBehaviour
         }
     }
 
-    public void LoadUnitsFromFile(StreamReader reader, string[] data)
+    public void LoadUnitsFromFile(string[] data)
     {
         try
         {
-            while (reader.Peek() >= 0)
+            if (data[0] == "UnitData")
             {
-                string line = reader.ReadLine();
-                if (line == null) break;
+                int playerIndex = int.Parse(data[1]);
+                int unitIndex = int.Parse(data[2]);
+                int health = int.Parse(data[3]);
+                int maxHealth = int.Parse(data[4]);
+                int attackPower = int.Parse(data[5]);
+                int attackRange = int.Parse(data[6]);
+                int moveRange = int.Parse(data[7]);
+                bool hasMoved = bool.Parse(data[8]);
+                bool hasAttacked = bool.Parse(data[9]);
+                float positionX = float.Parse(data[10]);
+                float positionY = float.Parse(data[11]);
 
-                data = line.Split(',');
+                // Устанавливаем тайл на карте
+                Vector3 unitPosition = new Vector3(positionX, positionY, 0);
 
-                if (data[0] == "UnitData")
+                // Получаем префаб на основе индекса игрока и юнита
+                GameObject unitPrefab = playerUnitPrefabs[playerIndex][unitIndex];
+
+                if (unitPrefab != null)
                 {
-                    int playerIndex = int.Parse(data[1]);
-                    int unitIndex = int.Parse(data[2]);
-                    int health = int.Parse(data[3]);
-                    int maxHealth = int.Parse(data[4]);
-                    int attackPower = int.Parse(data[5]);
-                    int attackRange = int.Parse(data[6]);
-                    int moveRange = int.Parse(data[7]);
-                    bool hasMoved = bool.Parse(data[8]);
-                    bool hasAttacked = bool.Parse(data[9]);
-                    float positionX = float.Parse(data[10]);
-                    float positionY = float.Parse(data[11]);
+                    // Создаем юнита на карте
+                    GameObject newUnit = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
 
-                    // Устанавливаем тайл на карте
-                    Vector3 unitPosition = new Vector3(positionX, positionY, 0);
-
-                    // Получаем префаб на основе индекса игрока и юнита
-                    GameObject unitPrefab = playerUnitPrefabs[playerIndex][unitIndex];
-
-                    if (unitPrefab != null)
+                    // Получаем компонент Unit и инициализируем его
+                    Unit unitComponent = newUnit.GetComponent<Unit>();
+                    if (unitComponent != null)
                     {
-                        // Создаем юнита на карте
-                        GameObject newUnit = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
+                        unitComponent.playerIndex = playerIndex;
+                        unitComponent.unitIndex = unitIndex;
+                        unitComponent.health = health;
+                        unitComponent.maxHealth = maxHealth;
+                        unitComponent.attackPower = attackPower;
+                        unitComponent.attackRange = attackRange;
+                        unitComponent.moveRange = moveRange;
+                        unitComponent.hasMoved = hasMoved;
+                        unitComponent.hasAttacked = hasAttacked;
 
-                        // Получаем компонент Unit и инициализируем его
-                        Unit unitComponent = newUnit.GetComponent<Unit>();
-                        if (unitComponent != null)
-                        {
-                            unitComponent.playerIndex = playerIndex;
-                            unitComponent.unitIndex = unitIndex;
-                            unitComponent.health = health;
-                            unitComponent.maxHealth = maxHealth;
-                            unitComponent.attackPower = attackPower;
-                            unitComponent.attackRange = attackRange;
-                            unitComponent.moveRange = moveRange;
-                            unitComponent.hasMoved = hasMoved;
-                            unitComponent.hasAttacked = hasAttacked;
-
-                            Debug.Log($"Юнит загружен на позиции ({positionX}, {positionY}) для игрока {playerIndex}.");
-                        }
-                        else
-                        {
-                            Debug.LogError("Компонент Unit не найден у созданного объекта.");
-                        }
+                        Debug.Log($"Юнит загружен на позиции ({positionX}, {positionY}) для игрока {playerIndex}.");
                     }
                     else
                     {
-                        Debug.LogError($"Префаб для игрока {playerIndex} и юнита {unitIndex} не найден.");
+                        Debug.LogError("Компонент Unit не найден у созданного объекта.");
                     }
+                }
+                else
+                {
+                    Debug.LogError($"Префаб для игрока {playerIndex} и юнита {unitIndex} не найден.");
                 }
             }
         }
@@ -331,6 +323,7 @@ public class UnitManager : MonoBehaviour
             Debug.LogError($"Ошибка загрузки юнитов: {ex.Message}");
         }
     }
+
 
     public void CreateUnit(int unitIndex, int playerIndex, Vector3 position, int health, int maxHealth, int attackPower, int attackRange, int moveRange, bool hasMoved, bool hasAttacked)
     {
