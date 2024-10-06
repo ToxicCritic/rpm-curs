@@ -10,6 +10,14 @@ TagManager:
   - Stone
   - Tree
   - Tile
+  - orcRock
+  - orcTree
+  - humanRock
+  - humanTree
+  - undeadRock
+  - elfRock
+  - elfTree
+  - undeadTree
   layers:
   - Default
   - TransparentFX

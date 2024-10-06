@@ -121,42 +121,22 @@ public class MapGenerator : MonoBehaviour
 
             if (IsValidGridPosition(gridPosition))
             {
-                // Занимаем центральную клетку
-                MarkTileAsOccupied(gridPosition, fortress);
+                GameObject tile = gridObjects[gridPosition.x, gridPosition.y];
 
-                // Занимаем клетки слева, сверху и слева сверху
-                Vector3Int topPosition = new Vector3Int(gridPosition.x, gridPosition.y + 1, gridPosition.z);
-                Vector3Int leftPosition = new Vector3Int(gridPosition.x - 1, gridPosition.y, gridPosition.z);
-                Vector3Int topLeftPosition = new Vector3Int(gridPosition.x - 1, gridPosition.y + 1, gridPosition.z);
+                if (tile != null)
+                {
+                    // Устанавливаем крепость как дочерний объект тайла
+                    fortress.transform.parent = tile.transform;
 
-                MarkTileAsOccupied(topPosition, fortress);
-                MarkTileAsOccupied(leftPosition, fortress);
-                MarkTileAsOccupied(topLeftPosition, fortress);
+                    Debug.Log($"Fortress placed on tile at {gridPosition.x},{gridPosition.y}.");
+                }
+                else
+                {
+                    Debug.LogWarning($"No tile found at {gridPosition.x},{gridPosition.y} to place the fortress!");
+                }
             }
         }
     }
-
-    // Метод для установки крепости как дочернего объекта клетки и отметки ее как занятой
-    void MarkTileAsOccupied(Vector3Int position, GameObject fortress)
-    {
-        if (IsValidGridPosition(position))
-        {
-            GameObject tile = gridObjects[position.x, position.y];
-
-            if (tile != null)
-            {
-                // Устанавливаем крепость как дочерний объект тайла
-                fortress.transform.parent = tile.transform;
-
-                Debug.Log($"Fortress placed on tile at {position.x},{position.y}.");
-            }
-            else
-            {
-                Debug.LogWarning($"No tile found at {position.x},{position.y} to place the fortress!");
-            }
-        }
-    }
-
 
 
     void SpawnResources()
@@ -168,20 +148,45 @@ public class MapGenerator : MonoBehaviour
                 if (gridObjects[x, y] != null && gridObjects[x, y].transform.childCount == 0)
                 {
                     Vector3 position = new Vector3(x + 0.5f, y + 0.5f, -0.1f);
-                    if (Random.value < treeProbability && !IsOccupied(x, y))
+
+                    // Проверяем занятость тайла крепостью или другим объектом
+                    if (!IsFortressOccupying(x, y))
                     {
-                        GameObject tree = Instantiate(GetTreePrefab(x, y), position, Quaternion.identity);
-                        tree.transform.parent = gridObjects[x, y].transform;
-                    }
-                    else if (Random.value < rockProbability && !IsOccupied(x, y))
-                    {
-                        GameObject rock = Instantiate(GetRockPrefab(x, y), position, Quaternion.identity);
-                        rock.transform.parent = gridObjects[x, y].transform;
+                        if (Random.value < treeProbability)
+                        {
+                            GameObject tree = Instantiate(GetTreePrefab(x, y), position, Quaternion.identity);
+                            tree.transform.parent = gridObjects[x, y].transform;
+                        }
+                        else if (Random.value < rockProbability)
+                        {
+                            GameObject rock = Instantiate(GetRockPrefab(x, y), position, Quaternion.identity);
+                            rock.transform.parent = gridObjects[x, y].transform;
+                        }
                     }
                 }
             }
         }
     }
+
+
+    bool IsFortressOccupying(int x, int y)
+    {
+        // Проверка самой клетки (центр крепости)
+        if (IsOccupied(x, y)) return true;
+
+        // Проверка клетки сверху
+        if (IsValidGridPosition(new Vector3Int(x, y + 1, 0)) && IsOccupied(x, y + 1)) return true;
+
+        // Проверка клетки слева
+        if (IsValidGridPosition(new Vector3Int(x - 1, y, 0)) && IsOccupied(x - 1, y)) return true;
+
+        // Проверка клетки сверху слева
+        if (IsValidGridPosition(new Vector3Int(x - 1, y + 1, 0)) && IsOccupied(x - 1, y + 1)) return true;
+
+        return false;
+    }
+
+
 
     public void SaveResourcesToFile(StreamWriter writer)
     {
