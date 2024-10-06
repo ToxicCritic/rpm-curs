@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.IO;
-using System.Collections;
 
 public class MainMenu : MonoBehaviour
 {
@@ -42,33 +41,15 @@ public class MainMenu : MonoBehaviour
     {
         if (File.Exists(saveFile))
         {
+            // Подписываемся на событие загрузки сцены
+            //SceneManager.sceneLoaded += OnGameSceneLoaded;
+
             // Загружаем игровую сцену
             SceneManager.LoadScene("GameScene");
-
-            // После загрузки сцены загружаем сохраненные данные
-            StartCoroutine(LoadGameAfterSceneLoaded());
         }
         else
         {
             Debug.Log("No saved game found!");
-        }
-    }
-
-    private IEnumerator LoadGameAfterSceneLoaded()
-    {
-        // Ждем завершения загрузки сцены
-        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == "GameScene");
-
-        // Находим SaveManager на сцене
-        SaveManager saveManager = FindObjectOfType<SaveManager>();
-        if (saveManager != null)
-        {
-            // Загружаем данные
-            saveManager.LoadGame();
-        }
-        else
-        {
-            Debug.LogError("SaveManager не найден на сцене!");
         }
     }
 

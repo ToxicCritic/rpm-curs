@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -76,10 +77,10 @@ public class MapGenerator : MonoBehaviour
     {
         Vector3[] positions = new Vector3[]
         {
-        new Vector3(1.5f, 1.5f, -0.1f),
-        new Vector3(1.5f, mapHeight - 2.5f, -0.1f),
-        new Vector3(mapWidth - 2.5f, 1.5f, -0.1f),
-        new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.1f)
+        new Vector3(1.5f, 1.5f, -0.2f),
+        new Vector3(1.5f, mapHeight - 2.5f, -0.2f),
+        new Vector3(mapWidth - 2.5f, 1.5f, -0.2f),
+        new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.2f)
         };
 
         for (int i = 0; i < 4; i++)
@@ -139,6 +140,34 @@ public class MapGenerator : MonoBehaviour
     }
 
 
+    bool IsFortressOccupying(float x, float y)
+    {
+        // Определяем углы карты, где располагаются крепости
+        List<Vector3> fortressPositions = new List<Vector3>
+        {
+        new Vector3(1.5f, 0.5f, -0.1f),
+        new Vector3(1.5f, 24.5f, -0.1f),
+        new Vector3(25.5f, 0.5f, -0.1f),
+        new Vector3(25.5f, 24.5f, -0.1f)   // Правая верхняя крепость
+        };
+
+        // Проверяем, находится ли клетка в одном из углов, зарезервированных для крепостей
+        foreach (var fortressPosition in fortressPositions)
+        {
+            // Проверяем каждую из 4 клеток, которые занимает крепость
+            if ((x == fortressPosition.x && y == fortressPosition.y) ||               // Центр крепости
+                (x == fortressPosition.x - 1f && y == fortressPosition.y) ||           // Правая клетка
+                (x == fortressPosition.x - 1f && y == fortressPosition.y + 1f) ||           // Верхняя клетка
+                (x == fortressPosition.x  && y == fortressPosition.y + 1f))         // Верхняя правая клетка
+            {
+                return true;
+            }
+        }
+
+        // Проверяем занятость этой клетки другим объектом (если она не является частью крепости)
+        return IsOccupied((int)x, (int)y);
+    }
+
     void SpawnResources()
     {
         for (int x = 0; x < mapWidth; x++)
@@ -149,8 +178,8 @@ public class MapGenerator : MonoBehaviour
                 {
                     Vector3 position = new Vector3(x + 0.5f, y + 0.5f, -0.1f);
 
-                    // Проверяем занятость тайла крепостью или другим объектом
-                    if (!IsFortressOccupying(x, y))
+                    // Проверяем, не является ли эта клетка частью крепости или занятой другим объектом
+                    if (!IsFortressOccupying(x + 0.5f, y + 0.5f))
                     {
                         if (Random.value < treeProbability)
                         {
@@ -166,24 +195,6 @@ public class MapGenerator : MonoBehaviour
                 }
             }
         }
-    }
-
-
-    bool IsFortressOccupying(int x, int y)
-    {
-        // Проверка самой клетки (центр крепости)
-        if (IsOccupied(x, y)) return true;
-
-        // Проверка клетки сверху
-        if (IsValidGridPosition(new Vector3Int(x, y + 1, 0)) && IsOccupied(x, y + 1)) return true;
-
-        // Проверка клетки слева
-        if (IsValidGridPosition(new Vector3Int(x - 1, y, 0)) && IsOccupied(x - 1, y)) return true;
-
-        // Проверка клетки сверху слева
-        if (IsValidGridPosition(new Vector3Int(x - 1, y + 1, 0)) && IsOccupied(x - 1, y + 1)) return true;
-
-        return false;
     }
 
 

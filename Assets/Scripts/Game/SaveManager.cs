@@ -38,14 +38,7 @@ public class SaveManager : MonoBehaviour
             Destroy(gameObject);  // Уничтожаем дубликат, если уже существует экземпляр
         }
 
-        // Подписываемся на событие загрузки новой сцены
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
 
-    private void OnDestroy()
-    {
-        // Отписываемся от события при уничтожении объекта
-        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -72,17 +65,6 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    // Метод для сброса ссылок на менеджеры (при переходе в главное меню или сохранении игры)
-    public void ResetManagerReferences()
-    {
-        mapGenerator = null;
-        gameResourceManager = null;
-        buildingManager = null;
-        unitManager = null;
-
-        Debug.Log("Ссылки на менеджеры сброшены.");
-    }
-
     private void CreateSaveFileIfNotExists()
     {
         // Проверяем, существует ли директория
@@ -103,6 +85,7 @@ public class SaveManager : MonoBehaviour
     public void SaveGame()
     {
         CreateSaveFileIfNotExists();
+        InitializeManagers();
 
         using (StreamWriter writer = new StreamWriter(saveFilePath))
         {
@@ -131,7 +114,6 @@ public class SaveManager : MonoBehaviour
                 unitManager.SaveUnitsToFile(writer);
             }
         }
-        ResetManagerReferences();
 
         Debug.Log("Игра сохранена в файл: " + saveFilePath);
     }
@@ -143,7 +125,7 @@ public class SaveManager : MonoBehaviour
             Debug.LogError("Файл сохранения не найден: " + saveFilePath);
             return;
         }
-
+        InitializeManagers();
         using (StreamReader reader = new StreamReader(saveFilePath))
         {
             string line;
