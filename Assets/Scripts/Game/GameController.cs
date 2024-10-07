@@ -19,10 +19,11 @@ public class GameController : MonoBehaviour
     // Метод для выхода в главное меню
     public void ExitToMainMenu()
     {
-        // Здесь можно вызвать логику сохранения игры перед выходом (если необходимо)
         SaveManager saveManager = FindObjectOfType<SaveManager>();
+
         if (saveManager != null)
         {
+            saveManager.InitializeManagers();
             saveManager.SaveGame(); // Сохранение игры перед выходом
         }
         else

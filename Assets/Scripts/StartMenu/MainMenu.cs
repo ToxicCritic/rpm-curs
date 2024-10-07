@@ -45,7 +45,8 @@ public class MainMenu : MonoBehaviour
             //SceneManager.sceneLoaded += OnGameSceneLoaded;
 
             // Загружаем игровую сцену
-            SceneManager.LoadScene("GameScene");
+             SceneManager.LoadScene("GameScene");
+
         }
         else
         {

@@ -38,7 +38,6 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
-        gridObjects = new GameObject[mapWidth, mapHeight];
         buildingManager = FindObjectOfType<BuildingManager>();
         if (!File.Exists(saveFile))
         {
@@ -92,6 +91,8 @@ public class MapGenerator : MonoBehaviour
             fortress.transform.parent = this.transform;
 
             Building building = fortress.GetComponent<Building>();
+            building.positionX = positions[i].x;
+            building.positionY = positions[i].y;
             if (building != null)
             {
                 FindObjectOfType<BuildingManager>().RegisterBuilding(building);

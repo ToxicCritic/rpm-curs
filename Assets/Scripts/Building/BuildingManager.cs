@@ -40,6 +40,11 @@ public class BuildingManager : MonoBehaviour
 
     public List<Building> playerBuildings = new List<Building>();
 
+    public GameObject orcFortressPrefab;
+    public GameObject elfFortressPrefab;
+    public GameObject humanFortressPrefab;
+    public GameObject undeadFortressPrefab;
+
 
     void Start()
     {
@@ -376,7 +381,7 @@ public class BuildingManager : MonoBehaviour
         foreach (var building in playerBuildings)
         {
             writer.Write("BuildingData,");
-            writer.WriteLine($"{(int)building.buildingType},{building.playerIndex},{building.health},{building.maxHealth},{building.hasProducedUnit},{building.transform.position.x},{building.transform.position.y}");
+            writer.WriteLine($"{(int)building.buildingType},{building.playerIndex},{building.health},{building.maxHealth},{building.hasProducedUnit},{building.positionX - 0.5f},{building.positionY - 0.5f}");
         }
     }
 
@@ -386,34 +391,75 @@ public class BuildingManager : MonoBehaviour
         try
         {
             BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[1]);
-            int playerIndex = int.Parse(data[2]);
+            int playerIndex = int.Parse(data[2]) - 1;
             int health = int.Parse(data[3]);
             int maxHealth = int.Parse(data[4]);
             bool hasProducedUnit = bool.Parse(data[5]);
-            float positionX = float.Parse(data[6]);
-            float positionY = float.Parse(data[7]);
+            float positionX = float.Parse(data[6]) + 0.5f;
+            float positionY = float.Parse(data[7]) + 0.5f;
 
             // Переключаемся на нужного игрока
             SetPlayer(playerIndex);
 
-            // Используем метод CreateBuilding для создания здания
-            Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
-            bool success = CreateBuilding((int)buildingType, gridPosition);
-
-            if (success)
+            // Проверяем, является ли здание крепостью
+            if (buildingType == BuildingType.Fortress)
             {
-                // Получаем созданное здание и устанавливаем его параметры
-                Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
-                createdBuilding.health = health;
-                createdBuilding.maxHealth = maxHealth;
-                createdBuilding.hasProducedUnit = hasProducedUnit;
-                createdBuilding.positionX = positionX;
-                createdBuilding.positionY = positionY;
+                // Если это крепость, вызываем метод для ее создания
+                Vector3 fortressPosition = new Vector3(positionX, positionY, -0.1f);
+                GameObject fortressPrefab = GetFortressPrefab(playerIndex);
+                GameObject fortress = Instantiate(fortressPrefab, fortressPosition, Quaternion.identity);
+                fortress.name = $"Player{playerIndex}Fortress";
+                fortress.transform.parent = this.transform;
+
+                Building fortressBuilding = fortress.GetComponent<Building>();
+                if (fortressBuilding != null)
+                {
+                    fortressBuilding.playerIndex = playerIndex;
+                    fortressBuilding.health = health;
+                    fortressBuilding.maxHealth = maxHealth;
+                    fortressBuilding.hasProducedUnit = hasProducedUnit;
+                    fortressBuilding.buildingType = BuildingType.Fortress;
+
+                    // Регистрация крепости в менеджере зданий
+                    RegisterBuilding(fortressBuilding);
+                }
             }
-        }          
+            else
+            {
+                // Обычные здания: используем метод CreateBuilding для создания
+                Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
+                bool success = CreateBuilding((int)buildingType, gridPosition);
+
+                if (success)
+                {
+                    // Получаем созданное здание и устанавливаем его параметры
+                    Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
+                    createdBuilding.health = health;
+                    createdBuilding.maxHealth = maxHealth;
+                    createdBuilding.hasProducedUnit = hasProducedUnit;
+                    createdBuilding.positionX = positionX;
+                    createdBuilding.positionY = positionY;
+                }
+            }
+        }
         catch (Exception ex)
         {
             Debug.LogError($"Ошибка загрузки зданий: {ex.Message}");
+        }
+    }
+
+    GameObject GetFortressPrefab(int playerIndex)
+    {
+        // В зависимости от индекса игрока, возвращаем нужный префаб крепости
+        switch (playerIndex)
+        {
+            case 0: return orcFortressPrefab;  // Орки
+            case 1: return humanFortressPrefab;  // Люди
+            case 2: return elfFortressPrefab;  // Эльфы
+            case 3: return undeadFortressPrefab;  // Нежить
+            default:
+                Debug.LogError($"Неизвестная раса для игрока с индексом {playerIndex}.");
+                return null;
         }
     }
 

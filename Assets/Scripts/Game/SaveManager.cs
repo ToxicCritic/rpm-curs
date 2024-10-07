@@ -12,18 +12,9 @@ public class SaveManager : MonoBehaviour
     private BuildingManager buildingManager;
     private UnitManager unitManager;
 
-    public static string saveDirectory;
-    public static string saveFilePath;
+    public static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
+    public static readonly string saveFilePath = Path.Combine(saveDirectory, "game_save.csv");
 
-    private void Start()
-    {
-        // При запуске игры обновляем ссылки на менеджеры
-        InitializeManagers();
-
-        saveDirectory = Path.Combine(Application.dataPath, "Saves");
-        saveFilePath = Path.Combine(saveDirectory, "game_save.csv");
-
-    }
 
     private void Awake()
     {
@@ -37,14 +28,6 @@ public class SaveManager : MonoBehaviour
         {
             Destroy(gameObject);  // Уничтожаем дубликат, если уже существует экземпляр
         }
-
-
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        // При каждой загрузке новой сцены обновляем ссылки на менеджеры
-        InitializeManagers();
     }
 
     // Метод для обновления ссылок на менеджеры
@@ -85,7 +68,6 @@ public class SaveManager : MonoBehaviour
     public void SaveGame()
     {
         CreateSaveFileIfNotExists();
-        InitializeManagers();
 
         using (StreamWriter writer = new StreamWriter(saveFilePath))
         {
