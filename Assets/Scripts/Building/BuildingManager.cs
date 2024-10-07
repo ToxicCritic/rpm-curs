@@ -391,7 +391,7 @@ public class BuildingManager : MonoBehaviour
         try
         {
             BuildingType buildingType = (BuildingType)Enum.Parse(typeof(BuildingType), data[1]);
-            int playerIndex = int.Parse(data[2]) - 1;
+            int playerIndex = int.Parse(data[2]);
             int health = int.Parse(data[3]);
             int maxHealth = int.Parse(data[4]);
             bool hasProducedUnit = bool.Parse(data[5]);
@@ -405,7 +405,7 @@ public class BuildingManager : MonoBehaviour
             if (buildingType == BuildingType.Fortress)
             {
                 // Если это крепость, вызываем метод для ее создания
-                Vector3 fortressPosition = new Vector3(positionX, positionY, -0.1f);
+                Vector3 fortressPosition = new Vector3(positionX, positionY, -0.2f);
                 GameObject fortressPrefab = GetFortressPrefab(playerIndex);
                 GameObject fortress = Instantiate(fortressPrefab, fortressPosition, Quaternion.identity);
                 fortress.name = $"Player{playerIndex}Fortress";
@@ -419,7 +419,8 @@ public class BuildingManager : MonoBehaviour
                     fortressBuilding.maxHealth = maxHealth;
                     fortressBuilding.hasProducedUnit = hasProducedUnit;
                     fortressBuilding.buildingType = BuildingType.Fortress;
-
+                    fortressBuilding.positionX = positionX;
+                    fortressBuilding.positionY = positionY;
                     // Регистрация крепости в менеджере зданий
                     RegisterBuilding(fortressBuilding);
                 }

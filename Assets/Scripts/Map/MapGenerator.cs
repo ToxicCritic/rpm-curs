@@ -93,6 +93,7 @@ public class MapGenerator : MonoBehaviour
             Building building = fortress.GetComponent<Building>();
             building.positionX = positions[i].x;
             building.positionY = positions[i].y;
+            building.playerIndex = i;
             if (building != null)
             {
                 FindObjectOfType<BuildingManager>().RegisterBuilding(building);

@@ -510,6 +510,10 @@ MonoBehaviour:
   alwaysOnHighlighterPrefab: {fileID: 7243079742214058201, guid: 406b3aba381693f4cb7568072ea8d38b, type: 3}
   unitPanelManager: {fileID: 1770759519}
   playerBuildings: []
+  orcFortressPrefab: {fileID: 5880857039557906279, guid: e10d17e6d96dbdf459b9f759a8c94148, type: 3}
+  elfFortressPrefab: {fileID: 1522532055427286457, guid: 0b38ef26c18e7e64dae643f4f85d5e1e, type: 3}
+  humanFortressPrefab: {fileID: 3359942732989934046, guid: 7b8d9a6890b07084b867c6a23c093d46, type: 3}
+  undeadFortressPrefab: {fileID: 3144102512167240170, guid: f375afffde3faab4684717f9c392fed3, type: 3}
 --- !u!1 &287633394
 GameObject:
   m_ObjectHideFlags: 0
@@ -1819,8 +1823,6 @@ MonoBehaviour:
   elfFortressPrefab: {fileID: 1522532055427286457, guid: 4b86e221f1c302a42a67108285d2b959, type: 3}
   humanFortressPrefab: {fileID: 3359942732989934046, guid: 7b8d9a6890b07084b867c6a23c093d46, type: 3}
   undeadFortressPrefab: {fileID: 3144102512167240170, guid: f375afffde3faab4684717f9c392fed3, type: 3}
-  mapWidth: 28
-  mapHeight: 28
   treeProbability: 0.07
   rockProbability: 0.07
 --- !u!4 &846377152
