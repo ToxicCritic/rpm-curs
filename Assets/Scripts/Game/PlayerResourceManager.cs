@@ -10,6 +10,7 @@ public class PlayerResourceManager : MonoBehaviour
     public int stone;
     public int gold;
 
+    public BuildingManager buildingManager;
     public TMP_Text woodText;
     public TMP_Text stoneText;
     public TMP_Text goldText;
@@ -31,6 +32,7 @@ public class PlayerResourceManager : MonoBehaviour
                 {
                     wood -= amount;
                     UpdateResourceUI();
+                    buildingManager.UpdateBuildPanel();
                     return true;
                 }
                 break;
@@ -39,6 +41,7 @@ public class PlayerResourceManager : MonoBehaviour
                 {
                     stone -= amount;
                     UpdateResourceUI();
+                    buildingManager.UpdateBuildPanel();
                     return true;
                 }
                 break;
@@ -47,6 +50,7 @@ public class PlayerResourceManager : MonoBehaviour
                 {
                     gold -= amount;
                     UpdateResourceUI();
+                    buildingManager.UpdateBuildPanel();
                     return true;
                 }
                 break;
@@ -69,6 +73,7 @@ public class PlayerResourceManager : MonoBehaviour
                 break;
         }
         UpdateResourceUI();
+        buildingManager.UpdateBuildPanel();
     }
 
     public void UpdateResourceUI()

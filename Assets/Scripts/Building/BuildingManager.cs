@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,6 +36,9 @@ public class BuildingManager : MonoBehaviour
     private bool isUnitPanelActive = false;
 
     public UnitPanelManager unitPanelManager;
+    public Sprite woodIcon;
+    public Sprite stoneIcon;
+    public TMP_FontAsset customTMPFont;
 
     public int currentPlayerIndex { get; set; }
 
@@ -44,6 +48,7 @@ public class BuildingManager : MonoBehaviour
     public GameObject elfFortressPrefab;
     public GameObject humanFortressPrefab;
     public GameObject undeadFortressPrefab;
+
 
 
     void Start()
@@ -92,7 +97,7 @@ public class BuildingManager : MonoBehaviour
         UpdateBuildPanel();
     }
 
-    void UpdateBuildPanel()
+    public void UpdateBuildPanel()
     {
         foreach (Transform child in buttonPanel)
         {
@@ -121,10 +126,78 @@ public class BuildingManager : MonoBehaviour
                 buttonImage.sprite = buildingSpriteRenderer.sprite;
             }
 
-            float xPos = spacing * (i + 1) + buttonWidth * i;
+            float xPos = 30 + spacing * (i + 1) + buttonWidth * i;
             button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
+
+            // Получаем компонент BuildingCost для отображения стоимости
+            BuildingCost cost = building.GetComponent<BuildingCost>();
+            if (cost != null)
+            {
+                // Создаем объект для текста стоимости дерева
+                GameObject woodCostTextObject = new GameObject("WoodCostText");
+                woodCostTextObject.transform.SetParent(button.transform);
+
+                TextMeshProUGUI woodCostText = woodCostTextObject.AddComponent<TextMeshProUGUI>();
+                woodCostText.text = cost.wood.ToString();  // Стоимость дерева
+                woodCostText.font = customTMPFont;  // Устанавливаем кастомный TMP шрифт
+                woodCostText.fontSize = 20;
+                woodCostText.color = Color.green;  // Задаем цвет текста для дерева
+                woodCostText.alignment = TextAlignmentOptions.Center;
+
+                // Позиционирование текста под кнопкой здания
+                RectTransform woodTextRectTransform = woodCostTextObject.GetComponent<RectTransform>();
+                woodTextRectTransform.sizeDelta = new Vector2(100, 30); // Размер текста
+                woodTextRectTransform.anchoredPosition = new Vector2(-45, 10); // Позиционирование
+
+                // Создаем объект для иконки дерева
+                GameObject woodIconObject = new GameObject("WoodIcon");
+                woodIconObject.transform.SetParent(button.transform);
+
+                Image woodIconImage = woodIconObject.AddComponent<Image>();
+                woodIconImage.sprite = woodIcon;  // Иконка дерева
+
+                // Позиционирование иконки дерева рядом с текстом
+                RectTransform woodIconRectTransform = woodIconObject.GetComponent<RectTransform>();
+                woodIconRectTransform.sizeDelta = new Vector2(24, 24);  // Размер иконки
+                woodIconRectTransform.anchoredPosition = new Vector2(-75, 10);  // Позиционирование
+
+                // Создаем объект для текста стоимости камня
+                GameObject stoneCostTextObject = new GameObject("StoneCostText");
+                stoneCostTextObject.transform.SetParent(button.transform);
+
+                TextMeshProUGUI stoneCostText = stoneCostTextObject.AddComponent<TextMeshProUGUI>();
+                stoneCostText.text = cost.stone.ToString();  // Стоимость камня
+                stoneCostText.font = customTMPFont;  // Устанавливаем кастомный TMP шрифт
+                stoneCostText.fontSize = 20;
+                stoneCostText.color = Color.gray;  // Задаем цвет текста для камня
+                stoneCostText.alignment = TextAlignmentOptions.Center;
+
+                // Позиционирование текста камня
+                RectTransform stoneTextRectTransform = stoneCostTextObject.GetComponent<RectTransform>();
+                stoneTextRectTransform.sizeDelta = new Vector2(100, 30);  // Размер текста
+                stoneTextRectTransform.anchoredPosition = new Vector2(-45, -15);  // Позиционирование
+
+                // Создаем объект для иконки камня
+                GameObject stoneIconObject = new GameObject("StoneIcon");
+                stoneIconObject.transform.SetParent(button.transform);
+
+                Image stoneIconImage = stoneIconObject.AddComponent<Image>();
+                stoneIconImage.sprite = stoneIcon;  // Иконка камня
+
+                // Позиционирование иконки камня рядом с текстом
+                RectTransform stoneIconRectTransform = stoneIconObject.GetComponent<RectTransform>();
+                stoneIconRectTransform.sizeDelta = new Vector2(24, 24);  // Размер иконки
+                stoneIconRectTransform.anchoredPosition = new Vector2(-75, -15);  // Позиционирование
+            }
+
+            PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
+            if (cost != null && !currentPlayerResourceManager.CanAfford(cost.wood, cost.stone, 0))
+            {
+                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); // Серый цвет, если ресурсов недостаточно
+            }
         }
     }
+
 
     void Update()
     {

@@ -79,7 +79,7 @@ public class UnitPanelManager : MonoBehaviour
             GameObject goldCostTextObject = new GameObject("GoldCostText");
             TextMeshProUGUI goldCostText = goldCostTextObject.AddComponent<TextMeshProUGUI>();
             goldCostText.text = cost != null ? cost.gold.ToString() : "0";
-            goldCostText.fontSize = 24; // Задаем размер шрифта
+            goldCostText.fontSize = 20; // Задаем размер шрифта
             goldCostText.font = fontAsset;
             goldCostText.alignment = TextAlignmentOptions.Center;
             goldCostTextObject.transform.SetParent(costPanel.transform, false);
@@ -105,7 +105,7 @@ public class UnitPanelManager : MonoBehaviour
             }
 
             // Позиционирование кнопок на панели
-            float xPos = spacing * (i + 1) + buttonWidth * i;
+            float xPos = 30 + spacing * (i + 1) + buttonWidth * i;
             button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
         }
     }
