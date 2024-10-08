@@ -12,6 +12,9 @@ public class Unit : MonoBehaviour
 
     public bool hasMoved;
     public bool hasAttacked;
+    public float positionX;
+    public float positionY;
+
     private Transform target;
 
     private SpriteRenderer spriteRenderer;

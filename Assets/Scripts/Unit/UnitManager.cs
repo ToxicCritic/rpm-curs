@@ -25,13 +25,7 @@ public class UnitManager : MonoBehaviour
         tileHighlighterInstance = Instantiate(tileHighlighterPrefab);
         tileHighlighterInstance.SetActive(false);
 
-        playerUnitPrefabs = new GameObject[4][];
 
-        // Загружаем префабы для каждой фракции
-        playerUnitPrefabs[0] = LoadUnitPrefabsForFaction("Orc");
-        playerUnitPrefabs[1] = LoadUnitPrefabsForFaction("Human");
-        playerUnitPrefabs[2] = LoadUnitPrefabsForFaction("Undead");
-        playerUnitPrefabs[3] = LoadUnitPrefabsForFaction("Elf");
     }
 
     void Update()
@@ -258,7 +252,7 @@ public class UnitManager : MonoBehaviour
     {
         foreach (var unit in units)
         {
-            writer.WriteLine($"UnitData,{unit.unitIndex},{unit.playerIndex},{unit.transform.position.x},{unit.transform.position.y},{unit.health},{unit.maxHealth},{unit.attackPower},{unit.attackRange},{unit.moveRange},{unit.hasMoved},{unit.hasAttacked}");
+            writer.WriteLine($"UnitData,{unit.playerIndex},{unit.unitIndex},{unit.health},{unit.maxHealth},{unit.attackPower},{unit.attackRange},{unit.moveRange},{unit.hasMoved},{unit.hasAttacked}, {unit.transform.position.x - 0.5f},{unit.transform.position.y}");
         }
     }
 
@@ -266,6 +260,14 @@ public class UnitManager : MonoBehaviour
     {
         try
         {
+            playerUnitPrefabs = new GameObject[4][];
+
+            // Загружаем префабы для каждой фракции
+            playerUnitPrefabs[0] = LoadUnitPrefabsForFaction("Orc");
+            playerUnitPrefabs[1] = LoadUnitPrefabsForFaction("Human");
+            playerUnitPrefabs[2] = LoadUnitPrefabsForFaction("Undead");
+            playerUnitPrefabs[3] = LoadUnitPrefabsForFaction("Elf");
+
             if (data[0] == "UnitData")
             {
                 int playerIndex = int.Parse(data[1]);
@@ -281,10 +283,10 @@ public class UnitManager : MonoBehaviour
                 float positionY = float.Parse(data[11]);
 
                 // Устанавливаем тайл на карте
-                Vector3 unitPosition = new Vector3(positionX, positionY, 0);
+                Vector3 unitPosition = new Vector3(positionX + 0.5f, positionY, -0.1f);
 
                 // Получаем префаб на основе индекса игрока и юнита
-                GameObject unitPrefab = playerUnitPrefabs[playerIndex][unitIndex];
+                GameObject unitPrefab = playerUnitPrefabs[playerIndex - 1][unitIndex];
 
                 if (unitPrefab != null)
                 {
@@ -322,43 +324,6 @@ public class UnitManager : MonoBehaviour
         {
             Debug.LogError($"Ошибка загрузки юнитов: {ex.Message}");
         }
-    }
-
-
-    public void CreateUnit(int unitIndex, int playerIndex, Vector3 position, int health, int maxHealth, int attackPower, int attackRange, int moveRange, bool hasMoved, bool hasAttacked)
-    {
-        GameObject unitPrefab = GetUnitPrefab(playerIndex, unitIndex); // Определяем префаб по индексу игрока и юнита
-        if (unitPrefab != null)
-        {
-            GameObject unit = Instantiate(unitPrefab, position, Quaternion.identity);
-            Unit unitComponent = unit.GetComponent<Unit>();
-
-            unitComponent.playerIndex = playerIndex;
-            unitComponent.unitIndex = unitIndex;
-            unitComponent.health = health;
-            unitComponent.maxHealth = maxHealth;
-            unitComponent.attackPower = attackPower;
-            unitComponent.attackRange = attackRange;
-            unitComponent.moveRange = moveRange;
-            unitComponent.hasMoved = hasMoved;
-            unitComponent.hasAttacked = hasAttacked;
-
-            units.Add(unitComponent); // Добавляем юнита в список
-        }
-        else
-        {
-            Debug.LogError($"Не удалось найти префаб для playerIndex {playerIndex} и unitIndex {unitIndex}");
-        }
-    }
-
-    public GameObject GetUnitPrefab(int playerIndex, int unitIndex)
-    {
-        if (playerIndex < playerUnitPrefabs.Length && unitIndex < playerUnitPrefabs[playerIndex].Length)
-        {
-            return playerUnitPrefabs[playerIndex][unitIndex];
-        }
-        Debug.LogError($"Не найден префаб для playerIndex {playerIndex} и unitIndex {unitIndex}");
-        return null;
     }
 
     private GameObject[] LoadUnitPrefabsForFaction(string factionName)

@@ -10,11 +10,11 @@ public class SaveManager : MonoBehaviour
     private MapGenerator mapGenerator;
     private GameResourceManager gameResourceManager;
     private BuildingManager buildingManager;
-    private UnitManager unitManager;
+    // Обновляем для поддержки 4 UnitManager для разных рас
+    public UnitManager[] unitManagers = new UnitManager[4];  // По индексу игрока
 
     public static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
     public static readonly string saveFilePath = Path.Combine(saveDirectory, "game_save.csv");
-
 
     private void Awake()
     {
@@ -36,9 +36,14 @@ public class SaveManager : MonoBehaviour
         mapGenerator = FindObjectOfType<MapGenerator>();
         gameResourceManager = FindObjectOfType<GameResourceManager>();
         buildingManager = FindObjectOfType<BuildingManager>();
-        unitManager = FindObjectOfType<UnitManager>();
 
-        if (mapGenerator == null || gameResourceManager == null || buildingManager == null || unitManager == null)
+        // Инициализация всех UnitManager для разных игроков (рас)
+        for (int i = 0; i < 4; i++)
+        {
+            unitManagers[i] = GameObject.Find($"UnitManager_Player{i}")?.GetComponent<UnitManager>();
+        }
+
+        if (mapGenerator == null || gameResourceManager == null || buildingManager == null || unitManagers[0] == null)
         {
             Debug.LogWarning("Не удалось найти все менеджеры на сцене!");
         }
@@ -90,10 +95,13 @@ public class SaveManager : MonoBehaviour
                 buildingManager.SaveBuildingsToFile(writer);
             }
 
-            // Сохранение юнитов
-            if (unitManager != null)
+            // Сохранение юнитов для каждого UnitManager
+            foreach (var unitManager in unitManagers)
             {
-                unitManager.SaveUnitsToFile(writer);
+                if (unitManager != null)
+                {
+                    unitManager.SaveUnitsToFile(writer);
+                }
             }
         }
 
@@ -107,7 +115,9 @@ public class SaveManager : MonoBehaviour
             Debug.LogError("Файл сохранения не найден: " + saveFilePath);
             return;
         }
+
         InitializeManagers();
+
         using (StreamReader reader = new StreamReader(saveFilePath))
         {
             string line;
@@ -142,9 +152,15 @@ public class SaveManager : MonoBehaviour
                         }
                         break;
                     case "UnitData":
-                        if (unitManager != null)
+                        // Определяем, к какому игроку относится юнит
+                        int playerIndex = int.Parse(data[2]);
+                        if (playerIndex >= 0 && playerIndex < unitManagers.Length && unitManagers[playerIndex] != null)
                         {
-                            unitManager.LoadUnitsFromFile(data);
+                            unitManagers[playerIndex].LoadUnitsFromFile(data);
+                        }
+                        else
+                        {
+                            Debug.LogError($"Некорректный индекс игрока: {playerIndex} при загрузке юнита.");
                         }
                         break;
                 }
