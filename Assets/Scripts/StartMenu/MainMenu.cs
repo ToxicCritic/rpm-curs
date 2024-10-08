@@ -34,7 +34,7 @@ public class MainMenu : MonoBehaviour
         }
 
         // Загружаем игровую сцену
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("RaceSelector");
     }
 
     public void ContinueGame()
