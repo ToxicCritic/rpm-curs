@@ -151,4 +151,19 @@ public class TurnManager : MonoBehaviour
             buildingManager.DestroyPlayerBuildingsAndUnits(currentTurnIndex);
         }
     }
+
+    public void SaveTurnToFile(StreamWriter writer)
+    {
+        writer.WriteLine($"TurnData,{currentTurnIndex}");
+    }
+
+    public void LoadTurnFromFile(string[] data)
+    {
+        if (data[0] == "TurnData")
+        {
+            PlayerPrefs.SetInt("SelectedRace", int.Parse(data[1]));
+            Debug.Log($"Ход игрока загружен: {currentTurnIndex}");
+        }
+    }
+
 }

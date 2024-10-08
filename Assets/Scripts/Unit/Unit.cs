@@ -32,8 +32,6 @@ public class Unit : MonoBehaviour
 
     void Start()
     {
-        hasMoved = false;
-        hasAttacked = false;
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
         unitManager = TurnManager.Instance.GetUnitManagerForPlayer(playerIndex); // ѕолучаем UnitManager дл€ соответствующего игрока

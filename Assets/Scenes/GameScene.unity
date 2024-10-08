@@ -727,6 +727,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04c962413bd325b468f32012d228343a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unitManagers:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!4 &362429753
 Transform:
   m_ObjectHideFlags: 0
@@ -2054,7 +2059,7 @@ GameObject:
   - component: {fileID: 1013250299}
   - component: {fileID: 1013250298}
   m_Layer: 0
-  m_Name: OrcUnitManager
+  m_Name: UnitManager_Player0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2195,7 +2200,7 @@ GameObject:
   - component: {fileID: 1319996000}
   - component: {fileID: 1319995999}
   m_Layer: 0
-  m_Name: ElfUnitManager
+  m_Name: UnitManager_Player3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2303,7 +2308,7 @@ GameObject:
   - component: {fileID: 1355767188}
   - component: {fileID: 1355767187}
   m_Layer: 0
-  m_Name: UndeadUnitManager
+  m_Name: UnitManager_Player2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2977,7 +2982,7 @@ GameObject:
   - component: {fileID: 2133361617}
   - component: {fileID: 2133361616}
   m_Layer: 0
-  m_Name: HumanUnitManager
+  m_Name: UnitManager_Player1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

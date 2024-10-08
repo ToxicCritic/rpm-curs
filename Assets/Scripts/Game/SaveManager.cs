@@ -12,6 +12,7 @@ public class SaveManager : MonoBehaviour
     private BuildingManager buildingManager;
     // Обновляем для поддержки 4 UnitManager для разных рас
     public UnitManager[] unitManagers = new UnitManager[4];  // По индексу игрока
+    private TurnManager turnManager;
 
     public static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
     public static readonly string saveFilePath = Path.Combine(saveDirectory, "game_save.csv");
@@ -36,6 +37,7 @@ public class SaveManager : MonoBehaviour
         mapGenerator = FindObjectOfType<MapGenerator>();
         gameResourceManager = FindObjectOfType<GameResourceManager>();
         buildingManager = FindObjectOfType<BuildingManager>();
+        turnManager = FindObjectOfType<TurnManager>();
 
         // Инициализация всех UnitManager для разных игроков (рас)
         for (int i = 0; i < 4; i++)
@@ -75,7 +77,7 @@ public class SaveManager : MonoBehaviour
         CreateSaveFileIfNotExists();
 
         using (StreamWriter writer = new StreamWriter(saveFilePath))
-        {
+        {          
             // Сохранение карты (тайлы и ресурсы)
             if (mapGenerator != null)
             {
@@ -103,6 +105,11 @@ public class SaveManager : MonoBehaviour
                     unitManager.SaveUnitsToFile(writer);
                 }
             }
+
+            if (turnManager != null)
+            {
+                turnManager.SaveTurnToFile(writer);
+            }
         }
 
         Debug.Log("Игра сохранена в файл: " + saveFilePath);
@@ -127,6 +134,12 @@ public class SaveManager : MonoBehaviour
 
                 switch (data[0])
                 {
+                    case "TurnData":
+                        if (turnManager != null)
+                        {
+                            turnManager.LoadTurnFromFile(data);
+                        }
+                        break;
                     case "Tile":
                         if (mapGenerator != null)
                         {

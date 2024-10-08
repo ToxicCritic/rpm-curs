@@ -36,7 +36,7 @@ public class BuildingManager : MonoBehaviour
 
     public UnitPanelManager unitPanelManager;
 
-    private int currentPlayerIndex;
+    public int currentPlayerIndex { get; set; }
 
     public List<Building> playerBuildings = new List<Building>();
 
