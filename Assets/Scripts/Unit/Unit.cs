@@ -171,7 +171,7 @@ public class Unit : MonoBehaviour
 
     public void CollectResource()
     {
-        if (target != null && (target.tag.Contains("Tree") || target.tag.Contains("Rock")))
+        if (!hasAttacked && target != null && (target.tag.Contains("Tree") || target.tag.Contains("Rock")))
         {
             string resourceType = "";
 
@@ -189,6 +189,7 @@ public class Unit : MonoBehaviour
             {
                 resourceManager.AddResource(resourceType, 10); // Добавляем 10 единиц ресурса в PlayerResourceManager
                 Destroy(target.gameObject); // Уничтожаем объект ресурса
+                hasAttacked = true;
                 Debug.Log($"{this.name} собрал {resourceType}");
             }
         }

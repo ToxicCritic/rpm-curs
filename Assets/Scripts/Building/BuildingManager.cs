@@ -206,29 +206,19 @@ public class BuildingManager : MonoBehaviour
             BuildingCost cost = buildingPrefab.GetComponent<BuildingCost>();
             PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
 
-            // Проверяем, хватает ли ресурсов
-            if (currentPlayerResourceManager.CanAfford(cost.wood, cost.stone, 0))
-            {
-                // Списываем ресурсы
-                currentPlayerResourceManager.SpendResource("wood", cost.wood);
-                currentPlayerResourceManager.SpendResource("stone", cost.stone);
 
-                // Создаем здание
-                Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
-                GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
-                Building building = buildingObject.GetComponent<Building>();
-                building.positionX = spawnPosition.x;
-                building.positionY = spawnPosition.y;
+            // Создаем здание
+            Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
+            GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
+            Building building = buildingObject.GetComponent<Building>();
+            building.positionX = spawnPosition.x;
+            building.positionY = spawnPosition.y;
 
-                // Регистрируем здание
-                RegisterBuilding(building);
+            // Регистрируем здание
+            RegisterBuilding(building);
 
-                return true; // Успешное создание здания
-            }
-            else
-            {
-                Debug.Log("Not enough resources to place building.");
-            }
+            return true; // Успешное создание здания
+
         }
         else
         {
@@ -440,6 +430,7 @@ public class BuildingManager : MonoBehaviour
                     createdBuilding.hasProducedUnit = hasProducedUnit;
                     createdBuilding.positionX = positionX;
                     createdBuilding.positionY = positionY;
+                    RegisterBuilding(createdBuilding);
                 }
             }
         }

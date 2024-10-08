@@ -17,11 +17,6 @@ public class PlayerResourceManager : MonoBehaviour
     private List<Mine> mines = new List<Mine>();
 
 
-    private void Start()
-    {
-        UpdateResourceUI();
-    }
-
     public bool CanAfford(int woodCost, int stoneCost, int goldCost)
     {
         return wood >= woodCost && stone >= stoneCost && gold >= goldCost;
@@ -76,7 +71,7 @@ public class PlayerResourceManager : MonoBehaviour
         UpdateResourceUI();
     }
 
-    private void UpdateResourceUI()
+    public void UpdateResourceUI()
     {
         woodText.text = wood.ToString();
         stoneText.text = stone.ToString();
@@ -107,9 +102,9 @@ public class PlayerResourceManager : MonoBehaviour
         if (data.Length >= 4) // ѕровер€ем, что данных достаточно дл€ загрузки
         {
             playerIndex = int.Parse(data[1]);
-            gold = int.Parse(data[2]);
-            wood = int.Parse(data[3]);
-            stone = int.Parse(data[4]);
+            wood = int.Parse(data[2]);
+            stone = int.Parse(data[3]);
+            gold = int.Parse(data[4]);
         }
         else
         {

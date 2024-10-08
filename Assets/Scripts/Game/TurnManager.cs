@@ -56,6 +56,7 @@ public class TurnManager : MonoBehaviour
         }
         currentTurnIndex = PlayerPrefs.GetInt("SelectedRace", 1);
         StartTurn();
+        playerResourceManagers[currentTurnIndex - 1].UpdateResourceUI();
         endTurnButton.onClick.AddListener(EndTurn);
     }
 
