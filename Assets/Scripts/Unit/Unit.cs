@@ -171,7 +171,7 @@ public class Unit : MonoBehaviour
 
     public void CollectResource()
     {
-        if (!hasAttacked && target != null && (target.tag.Contains("Tree") || target.tag.Contains("Rock")))
+        if (!hasAttacked && target != null && (target.tag.Contains("Tree") || target.tag.Contains("Rock")) && Vector3.Distance(transform.position, target.position) <= attackRange + 1)
         {
             string resourceType = "";
 

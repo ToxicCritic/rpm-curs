@@ -509,6 +509,9 @@ MonoBehaviour:
   tileHighlighterPrefab: {fileID: 1252071738450517059, guid: 1572220e28191594f95fdb8ce63fcb3e, type: 3}
   alwaysOnHighlighterPrefab: {fileID: 7243079742214058201, guid: 406b3aba381693f4cb7568072ea8d38b, type: 3}
   unitPanelManager: {fileID: 1770759519}
+  woodIcon: {fileID: 21300000, guid: efa1efd2b881fed4f85fb7ea46f73b15, type: 3}
+  stoneIcon: {fileID: 21300000, guid: 9cdd78256a2566542b2f3dbd0554c2d8, type: 3}
+  customTMPFont: {fileID: 11400000, guid: 8efe980a54205cd47bc489e369d4121e, type: 2}
   playerBuildings: []
   orcFortressPrefab: {fileID: 5880857039557906279, guid: e10d17e6d96dbdf459b9f759a8c94148, type: 3}
   elfFortressPrefab: {fileID: 1522532055427286457, guid: 0b38ef26c18e7e64dae643f4f85d5e1e, type: 3}
@@ -1091,9 +1094,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIndex: 3
-  wood: 1000
-  stone: 1000
-  gold: 1000
+  wood: 10
+  stone: 10
+  gold: 10
+  buildingManager: {fileID: 235391471}
   woodText: {fileID: 1751481323}
   stoneText: {fileID: 221652481}
   goldText: {fileID: 794835342}
@@ -1540,9 +1544,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIndex: 4
-  wood: 1000
-  stone: 1000
-  gold: 1000
+  wood: 10
+  stone: 10
+  gold: 10
+  buildingManager: {fileID: 235391471}
   woodText: {fileID: 1751481323}
   stoneText: {fileID: 221652481}
   goldText: {fileID: 794835342}
@@ -1951,9 +1956,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIndex: 1
-  wood: 1000
-  stone: 1000
-  gold: 1000
+  wood: 10
+  stone: 10
+  gold: 10
+  buildingManager: {fileID: 235391471}
   woodText: {fileID: 1751481323}
   stoneText: {fileID: 221652481}
   goldText: {fileID: 794835342}
@@ -2713,7 +2719,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitButtonPanel: {fileID: 2031492710}
   unitButtonPrefab: {fileID: 5349109786915209793, guid: bd582dd591a47cc4f80d9511636fd517, type: 3}
+  goldIconSprite: {fileID: 21300000, guid: 00494a524539c9249bcfc76c078626e7, type: 3}
   buildingManager: {fileID: 235391471}
+  fontAsset: {fileID: 11400000, guid: 8efe980a54205cd47bc489e369d4121e, type: 2}
 --- !u!4 &1770759520
 Transform:
   m_ObjectHideFlags: 0
@@ -2834,9 +2842,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerIndex: 2
-  wood: 1000
-  stone: 1000
-  gold: 1000
+  wood: 10
+  stone: 10
+  gold: 10
+  buildingManager: {fileID: 235391471}
   woodText: {fileID: 1751481323}
   stoneText: {fileID: 221652481}
   goldText: {fileID: 794835342}

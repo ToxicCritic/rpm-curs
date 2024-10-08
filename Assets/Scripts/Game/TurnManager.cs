@@ -139,7 +139,7 @@ public class TurnManager : MonoBehaviour
         else
         {
             activePlayers.Remove(playerIndex);
-            Debug.Log($"Player {playerNames[playerIndex - 1]} has been deactivated.");
+            Debug.Log($"Player {playerNames[playerIndex]} has been deactivated.");
         }
 
         if (activePlayers.Count == 1)

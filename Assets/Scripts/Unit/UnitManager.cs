@@ -68,24 +68,50 @@ public class UnitManager : MonoBehaviour
                 {
                     SelectUnit(hitUnit);
                 }
-                else if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitUnit.transform.position) <= SelectedUnit.attackRange + 0.5f)
+                else if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitUnit.transform.position) <= SelectedUnit.attackRange + 0.75f)
                 {
                     SelectedUnit.SetTarget(hitUnit.transform);
                     SelectedUnit.Attack();
                 }
             }
-            else if (hitCollider != null && SelectedUnit != null)
+            else if (hitCollider != null && SelectedUnit != null && SelectedUnit.unitIndex == 1)
             {
                 // Проверка, является ли кликнутый объект ресурсом
                 string resourceTag = hitCollider.tag;
                 if (resourceTag.Contains("Tree") || resourceTag.Contains("Rock")) // Проверяем теги ресурсов
                 {
-                    if (SelectedUnit.unitIndex == 1)
+                    SelectedUnit.SetTarget(hitCollider.transform);
+                    SelectedUnit.CollectResource(); // Для юнитов, способных собирать ресурсы
+                    DeselectUnit();
+                    return;
+                }
+            }
+            else if (hitCollider != null)
+            {
+                if (hitCollider.GetComponent<Tower>() != null)
+                {
+                    Tower tower = hitCollider.GetComponent<Tower>();
+                    SelectTower(tower);
+                    return;
+                }
+                else if (hitCollider.GetComponent<Building>() != null && hitCollider.GetComponent<Building>().buildingType == Building.BuildingType.Fortress)
+                {
+                    Building hitBuilding = hitCollider.GetComponent<Building>();
+                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 1.8f)
                     {
-                        SelectedUnit.SetTarget(hitCollider.transform);
-                        SelectedUnit.CollectResource(); // Для юнитов, способных собирать ресурсы
+                        SelectedUnit.SetTarget(hitBuilding.transform);
+                        SelectedUnit.Attack();
                         DeselectUnit();
-                        return;
+                    }
+                }
+                else if (hitCollider.GetComponent<Building>() != null)
+                {
+                    Building hitBuilding = hitCollider.GetComponent<Building>();
+                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 1.0f)
+                    {
+                        SelectedUnit.SetTarget(hitBuilding.transform);
+                        SelectedUnit.Attack();
+                        DeselectUnit();
                     }
                 }
             }
@@ -110,7 +136,7 @@ public class UnitManager : MonoBehaviour
             DeselectTower(); // Добавлено снятие выделения с башни
         }
     }
-
+        
 
 
     private void SelectTower(Tower tower)
