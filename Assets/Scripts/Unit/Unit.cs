@@ -21,6 +21,7 @@ public class Unit : MonoBehaviour
     private Color originalColor;
 
     private UnitManager unitManager;
+    public PlayerResourceManager resourceManager; // Ссылка на менеджер ресурсов
 
     public GameObject fullHealthBarPrefab;
     public GameObject threeQuarterHealthBarPrefab;
@@ -167,6 +168,33 @@ public class Unit : MonoBehaviour
             Debug.LogError("Цель вне досягаемости или атака уже совершена.");
         }
     }
+
+    public void CollectResource()
+    {
+        if (target != null && (target.tag.Contains("Tree") || target.tag.Contains("Rock")))
+        {
+            string resourceType = "";
+
+            // Определяем тип ресурса
+            if (target.tag.Contains("Tree"))
+            {
+                resourceType = "wood";
+            }
+            else if (target.tag.Contains("Rock"))
+            {
+                resourceType = "stone";
+            }
+
+            if (!string.IsNullOrEmpty(resourceType))
+            {
+                resourceManager.AddResource(resourceType, 10); // Добавляем 10 единиц ресурса в PlayerResourceManager
+                Destroy(target.gameObject); // Уничтожаем объект ресурса
+                Debug.Log($"{this.name} собрал {resourceType}");
+            }
+        }
+    }
+
+
 
     public void TakeDamage(int damage)
     {

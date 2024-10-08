@@ -2081,6 +2081,7 @@ MonoBehaviour:
   tileHighlighterPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   moveRangeIndicatorPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   attackRangeIndicatorPrefab: {fileID: 7266208848110412867, guid: f086cc28fd87aea468d30fe6c4cd78b6, type: 3}
+  gameResourceManager: {fileID: 1037884992}
 --- !u!4 &1013250299
 Transform:
   m_ObjectHideFlags: 0
@@ -2222,6 +2223,7 @@ MonoBehaviour:
   tileHighlighterPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   moveRangeIndicatorPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   attackRangeIndicatorPrefab: {fileID: 7266208848110412867, guid: f086cc28fd87aea468d30fe6c4cd78b6, type: 3}
+  gameResourceManager: {fileID: 1037884992}
 --- !u!4 &1319996000
 Transform:
   m_ObjectHideFlags: 0
@@ -2330,6 +2332,7 @@ MonoBehaviour:
   tileHighlighterPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   moveRangeIndicatorPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   attackRangeIndicatorPrefab: {fileID: 7266208848110412867, guid: f086cc28fd87aea468d30fe6c4cd78b6, type: 3}
+  gameResourceManager: {fileID: 1037884992}
 --- !u!4 &1355767188
 Transform:
   m_ObjectHideFlags: 0
@@ -3004,6 +3007,7 @@ MonoBehaviour:
   tileHighlighterPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   moveRangeIndicatorPrefab: {fileID: 5312665630073140525, guid: 311524ab41d653248a3a15ea850b6815, type: 3}
   attackRangeIndicatorPrefab: {fileID: 7266208848110412867, guid: f086cc28fd87aea468d30fe6c4cd78b6, type: 3}
+  gameResourceManager: {fileID: 1037884992}
 --- !u!4 &2133361617
 Transform:
   m_ObjectHideFlags: 0

@@ -11,6 +11,7 @@ public class UnitManager : MonoBehaviour
     public GameObject moveRangeIndicatorPrefab;
     public GameObject attackRangeIndicatorPrefab;
     public GameObject[][] playerUnitPrefabs;
+    public GameResourceManager gameResourceManager;
 
     private List<GameObject> moveRangeIndicators = new List<GameObject>();
     private List<GameObject> attackRangeIndicators = new List<GameObject>();
@@ -39,6 +40,7 @@ public class UnitManager : MonoBehaviour
     public void RegisterUnit(Unit unit)
     {
         units.Add(unit);
+        unit.resourceManager = gameResourceManager.GetResourceManagerForPlayer(unit.playerIndex);
     }
 
     public void UnregisterUnit(Unit unit)
@@ -72,22 +74,18 @@ public class UnitManager : MonoBehaviour
                     SelectedUnit.Attack();
                 }
             }
-            else if (hitCollider != null)
+            else if (hitCollider != null && SelectedUnit != null)
             {
-                if (hitCollider.GetComponent<Tower>() != null)
+                // Проверка, является ли кликнутый объект ресурсом
+                string resourceTag = hitCollider.tag;
+                if (resourceTag.Contains("Tree") || resourceTag.Contains("Rock")) // Проверяем теги ресурсов
                 {
-                    Tower tower = hitCollider.GetComponent<Tower>(); 
-                    SelectTower(tower);
-                    return;
-                }
-                else if (hitCollider.GetComponent<Building>() != null)
-                {
-                    Building hitBuilding = hitCollider.GetComponent<Building>();
-                    if (SelectedUnit != null && Vector3.Distance(SelectedUnit.transform.position, hitBuilding.transform.position) <= SelectedUnit.attackRange + 1f)
+                    if (SelectedUnit.unitIndex == 1)
                     {
-                        SelectedUnit.SetTarget(hitBuilding.transform);
-                        SelectedUnit.Attack();
+                        SelectedUnit.SetTarget(hitCollider.transform);
+                        SelectedUnit.CollectResource(); // Для юнитов, способных собирать ресурсы
                         DeselectUnit();
+                        return;
                     }
                 }
             }
@@ -112,6 +110,8 @@ public class UnitManager : MonoBehaviour
             DeselectTower(); // Добавлено снятие выделения с башни
         }
     }
+
+
 
     private void SelectTower(Tower tower)
     {

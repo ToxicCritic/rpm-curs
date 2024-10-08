@@ -24,4 +24,17 @@ public class GameResourceManager : MonoBehaviour
             }
         }
     }
+
+    public PlayerResourceManager GetResourceManagerForPlayer(int playerIndex)
+    {
+        foreach (var manager in playerResourceManagers)
+        {
+            if (manager.playerIndex == playerIndex)
+            {
+                return manager;
+            }
+        }
+        Debug.LogError($"PlayerResourceManager для игрока {playerIndex} не найден.");
+        return null;
+    }
 }
