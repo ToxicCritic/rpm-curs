@@ -143,13 +143,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerIndex: 3
   unitIndex: 1
-  health: 65
-  maxHealth: 65
-  attackPower: 7
+  health: 50
+  maxHealth: 50
+  attackPower: 5
   attackRange: 1
   moveRange: 5
   hasMoved: 0
   hasAttacked: 0
+  positionX: 0
+  positionY: 0
+  resourceManager: {fileID: 0}
   fullHealthBarPrefab: {fileID: 7413367169484263402, guid: 8d2c9de5880a322438c60e4430a2290e, type: 3}
   threeQuarterHealthBarPrefab: {fileID: 6047989053404474021, guid: 84bf14e23bf5e964980cd3deb098e93a, type: 3}
   halfHealthBarPrefab: {fileID: 4707333265590933668, guid: 11ce2f6f47cb89f4dbf52903a782c232, type: 3}

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UnitManager : MonoBehaviour
 {
-    public List<Unit> units;  // Список юнитов фракции
+    public List<Unit> units;  
     public GameObject tileHighlighterPrefab;
     private GameObject tileHighlighterInstance;
     public GameObject moveRangeIndicatorPrefab;
@@ -76,12 +76,11 @@ public class UnitManager : MonoBehaviour
             }
             else if (hitCollider != null && SelectedUnit != null && SelectedUnit.unitIndex == 1)
             {
-                // Проверка, является ли кликнутый объект ресурсом
                 string resourceTag = hitCollider.tag;
-                if (resourceTag.Contains("Tree") || resourceTag.Contains("Rock")) // Проверяем теги ресурсов
+                if (resourceTag.Contains("Tree") || resourceTag.Contains("Rock"))
                 {
                     SelectedUnit.SetTarget(hitCollider.transform);
-                    SelectedUnit.CollectResource(); // Для юнитов, способных собирать ресурсы
+                    SelectedUnit.CollectResource();
                     DeselectUnit();
                     return;
                 }
@@ -133,7 +132,7 @@ public class UnitManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             DeselectUnit();
-            DeselectTower(); // Добавлено снятие выделения с башни
+            DeselectTower(); 
         }
     }
         
@@ -170,7 +169,7 @@ public class UnitManager : MonoBehaviour
         SelectedUnit = unit;
         SelectedUnit.Select();
 
-        tileHighlighterInstance.transform.position = new Vector3(unit.transform.position.x, unit.transform.position.y + 0.5f, unit.transform.position.z); // Подняли выделение на 0.5 по Y
+        tileHighlighterInstance.transform.position = new Vector3(unit.transform.position.x, unit.transform.position.y + 0.5f, unit.transform.position.z); 
         tileHighlighterInstance.SetActive(true);
 
         ShowMoveRangeIndicators(unit);
@@ -272,6 +271,9 @@ public class UnitManager : MonoBehaviour
         {
             unit.EndTurn();
         }
+        ClearMoveRangeIndicators();
+        ClearAttackRangeIndicators();
+        DeselectUnit();
     }
 
     public void SaveUnitsToFile(StreamWriter writer)
@@ -288,7 +290,6 @@ public class UnitManager : MonoBehaviour
         {
             playerUnitPrefabs = new GameObject[4][];
 
-            // Загружаем префабы для каждой фракции
             playerUnitPrefabs[0] = LoadUnitPrefabsForFaction("Orc");
             playerUnitPrefabs[1] = LoadUnitPrefabsForFaction("Human");
             playerUnitPrefabs[2] = LoadUnitPrefabsForFaction("Undead");
@@ -308,18 +309,14 @@ public class UnitManager : MonoBehaviour
                 float positionX = float.Parse(data[10]);
                 float positionY = float.Parse(data[11]);
 
-                // Устанавливаем тайл на карте
                 Vector3 unitPosition = new Vector3(positionX + 0.5f, positionY, -0.1f);
 
-                // Получаем префаб на основе индекса игрока и юнита
                 GameObject unitPrefab = playerUnitPrefabs[playerIndex - 1][unitIndex];
 
                 if (unitPrefab != null)
                 {
-                    // Создаем юнита на карте
                     GameObject newUnit = Instantiate(unitPrefab, unitPosition, Quaternion.identity);
 
-                    // Получаем компонент Unit и инициализируем его
                     Unit unitComponent = newUnit.GetComponent<Unit>();
                     if (unitComponent != null)
                     {
@@ -356,13 +353,11 @@ public class UnitManager : MonoBehaviour
     {
         GameObject[] unitPrefabs = new GameObject[4];
 
-        // Загружаем префабы юнитов из папки Resources/Prefabs/Troops/<factionName>/
         for (int i = 0; i < 4; i++)
         {
             string path = $"Prefabs/Troops/{factionName}/{factionName}{i}";
             unitPrefabs[i] = Resources.Load<GameObject>(path);
 
-            // Проверяем, загрузился ли префаб успешно
             if (unitPrefabs[i] == null)
             {
                 Debug.LogError($"Не удалось загрузить префаб по пути: {path}");

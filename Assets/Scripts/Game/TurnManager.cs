@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class TurnManager : MonoBehaviour
@@ -12,19 +13,19 @@ public class TurnManager : MonoBehaviour
 
     public List<UnitManager> unitManagers;
     public List<PlayerResourceManager> playerResourceManagers;
-    public BuildingManager buildingManager; // Обновленный BuildingManager
+    public BuildingManager buildingManager; 
     public Button endTurnButton;
     public TMP_Text turnText;
 
     public TMP_Text gameOverText;
     public Image gameOverOutline;
+    public Image gameOverBackground;
 
-    public int currentTurnIndex = 1; // Начинаем с 1
+    public int currentTurnIndex = 1; 
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
 
     public HashSet<int> activePlayers;
 
-    // Константа для пути файла сохранения в папке проекта
     private static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
     private static readonly string saveFile = Path.Combine(saveDirectory, "game_save.csv");
 
@@ -38,9 +39,8 @@ public class TurnManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        activePlayers = new HashSet<int> { 1, 2, 3, 4 }; // Все игроки активны в начале игры
+        activePlayers = new HashSet<int> { 1, 2, 3, 4 };
 
-        // Создание папки для сохранений, если она не существует
         if (!Directory.Exists(saveDirectory))
         {
             Directory.CreateDirectory(saveDirectory);
@@ -64,15 +64,15 @@ public class TurnManager : MonoBehaviour
     {
         if (!activePlayers.Contains(currentTurnIndex))
         {
-            EndTurn(); // Пропускаем ход, если игрок не активен
+            EndTurn(); 
             return;
         }
 
         Debug.Log($"Starting turn for player {currentTurnIndex}");
-        unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex); // Индексация с 1
-        buildingManager.SetPlayer(currentTurnIndex); // Обновление доступных зданий для текущего игрока
+        unitManagers[currentTurnIndex - 1].StartTurn(currentTurnIndex); 
+        buildingManager.SetPlayer(currentTurnIndex); 
         buildingManager.StartTurnForBuildings(currentTurnIndex);
-        playerResourceManagers[currentTurnIndex - 1].StartTurn(); // Обновление ресурсов для текущего игрока
+        playerResourceManagers[currentTurnIndex - 1].StartTurn();
         UpdateTurnText();
     }
 
@@ -81,17 +81,35 @@ public class TurnManager : MonoBehaviour
         Debug.Log($"Ending turn for player {currentTurnIndex}");
         unitManagers[currentTurnIndex - 1].EndTurn();
         buildingManager.EndTurnForBuildings(currentTurnIndex);
-        playerResourceManagers[currentTurnIndex - 1].EndTurn(); // Завершение хода для текущего игрока
-        currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1; // Переключение между всеми игроками
+        playerResourceManagers[currentTurnIndex - 1].EndTurn(); 
 
-        // Пропускаем ходы неактивных игроков
-        while (!activePlayers.Contains(currentTurnIndex))
+        currentTurnIndex = GetNextActivePlayer();
+
+        if (currentTurnIndex == -1)
         {
-            currentTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
+            Debug.LogError("No active players left!");
+            return;
         }
 
         Debug.Log($"Next turn index: {currentTurnIndex}");
         StartTurn();
+    }
+
+    private int GetNextActivePlayer()
+    {
+        int nextTurnIndex = (currentTurnIndex % unitManagers.Count) + 1;
+
+        while (!activePlayers.Contains(nextTurnIndex))
+        {
+            nextTurnIndex = (nextTurnIndex % unitManagers.Count) + 1;
+
+            if (nextTurnIndex == currentTurnIndex)
+            {
+                return -1;
+            }
+        }
+
+        return nextTurnIndex;
     }
 
     void Update()
@@ -139,18 +157,35 @@ public class TurnManager : MonoBehaviour
         else
         {
             activePlayers.Remove(playerIndex);
-            Debug.Log($"Player {playerNames[playerIndex]} has been deactivated.");
+            Debug.Log($"Player {playerNames[playerIndex - 1]} has been deactivated.");
         }
 
         if (activePlayers.Count == 1)
         {
-            gameOverText.text = $"Игра окончена! Победитель: {playerNames[currentTurnIndex - 1]}";
+            int lastActivePlayer = activePlayers.First();
+            gameOverText.text = $"Игра окончена! Победитель: {playerNames[lastActivePlayer - 1]}";
+            gameOverBackground.gameObject.SetActive(true);
             gameOverOutline.gameObject.SetActive(true);
             turnText.gameObject.SetActive(false);
             endTurnButton.gameObject.SetActive(false);
-            Debug.Log($"Game over! Player {currentTurnIndex} has won the game!");
-            buildingManager.DestroyPlayerBuildingsAndUnits(currentTurnIndex);
+            Debug.Log($"Game over! Player {lastActivePlayer} has won the game!");
+            buildingManager.DestroyPlayerBuildingsAndUnits(lastActivePlayer);
+
+            StartCoroutine(EndGameRoutine());
         }
+    }
+
+    private IEnumerator EndGameRoutine()
+    {
+        yield return new WaitForSeconds(5);
+
+        if (File.Exists(saveFile))
+        {
+            File.Delete(saveFile);
+            Debug.Log("Game save file deleted.");
+        }
+
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void SaveTurnToFile(StreamWriter writer)
@@ -166,5 +201,4 @@ public class TurnManager : MonoBehaviour
             Debug.Log($"Ход игрока загружен: {currentTurnIndex}");
         }
     }
-
 }

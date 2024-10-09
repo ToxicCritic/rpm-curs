@@ -8,7 +8,7 @@ public class Building : MonoBehaviour
         Barracks,
         Mine,
         Tower,
-        Fortress // Добавлено крепость
+        Fortress 
     }
 
     public BuildingType buildingType;
@@ -93,11 +93,11 @@ public class Building : MonoBehaviour
 
         if (buildingType == BuildingType.Fortress)
         {
-            healthBarInstance.transform.localPosition = new Vector3(0.5f, 1.8f, -0.2f); // Позиционирование над крепостью
+            healthBarInstance.transform.localPosition = new Vector3(0.5f, 1.8f, -0.2f); 
         }
         else
         {
-            healthBarInstance.transform.localPosition = new Vector3(0, 0.8f, -0.2f); // Позиционирование над зданием
+            healthBarInstance.transform.localPosition = new Vector3(0, 0.8f, -0.2f); 
         }
 
         Debug.Log($"Health bar created and positioned at: {healthBarInstance.transform.position}");
@@ -115,13 +115,13 @@ public class Building : MonoBehaviour
     void GenerateGold()
     {
         PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
-        currentPlayerResourceManager.AddResource("gold", 3); // Пример генерации золота
-        Debug.Log($"Шахта добыла 3 золота для игрока {playerIndex}");
+        currentPlayerResourceManager.AddResource("gold", 2);
+        Debug.Log($"Шахта добыла 2 золота для игрока {playerIndex}");
     }
 
     public virtual void EndTurn()
     {
-        // Do nothing here, override in derived classes if needed
+
     }
 
     public bool CanProduceUnit()

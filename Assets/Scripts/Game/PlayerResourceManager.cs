@@ -104,7 +104,7 @@ public class PlayerResourceManager : MonoBehaviour
 
     public void LoadPlayerResources(string[] data)
     {
-        if (data.Length >= 4) // ѕровер€ем, что данных достаточно дл€ загрузки
+        if (data.Length >= 4) 
         {
             playerIndex = int.Parse(data[1]);
             wood = int.Parse(data[2]);

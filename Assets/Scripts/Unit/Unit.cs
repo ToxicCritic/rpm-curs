@@ -21,7 +21,7 @@ public class Unit : MonoBehaviour
     private Color originalColor;
 
     private UnitManager unitManager;
-    public PlayerResourceManager resourceManager; // Ссылка на менеджер ресурсов
+    public PlayerResourceManager resourceManager; 
 
     public GameObject fullHealthBarPrefab;
     public GameObject threeQuarterHealthBarPrefab;
@@ -35,7 +35,7 @@ public class Unit : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalColor = spriteRenderer.color;
-        unitManager = TurnManager.Instance.GetUnitManagerForPlayer(playerIndex); // Получаем UnitManager для соответствующего игрока
+        unitManager = TurnManager.Instance.GetUnitManagerForPlayer(playerIndex); 
         unitManager.RegisterUnit(this);
 
         UpdateHealthBar();
@@ -175,7 +175,6 @@ public class Unit : MonoBehaviour
         {
             string resourceType = "";
 
-            // Определяем тип ресурса
             if (target.tag.Contains("Tree"))
             {
                 resourceType = "wood";
@@ -187,8 +186,8 @@ public class Unit : MonoBehaviour
 
             if (!string.IsNullOrEmpty(resourceType))
             {
-                resourceManager.AddResource(resourceType, 10); // Добавляем 10 единиц ресурса в PlayerResourceManager
-                Destroy(target.gameObject); // Уничтожаем объект ресурса
+                resourceManager.AddResource(resourceType, 10); 
+                Destroy(target.gameObject); 
                 hasAttacked = true;
                 Debug.Log($"{this.name} собрал {resourceType}");
             }

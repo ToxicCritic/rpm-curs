@@ -16,7 +16,7 @@ public class UnitPanelManager : MonoBehaviour
     public void ShowUnitCreationPanel(Building building)
     {
         SelectBuildingInstance(building);
-        unitButtonPanel.gameObject.SetActive(true); // Показываем панель юнитов
+        unitButtonPanel.gameObject.SetActive(true); 
     }
 
     private void SelectBuildingInstance(Building building)
@@ -26,35 +26,30 @@ public class UnitPanelManager : MonoBehaviour
         if (building.buildingType == Building.BuildingType.Barracks || building.buildingType == Building.BuildingType.ResourceGatherer)
         {
             UpdateUnitPanel();
-            buildingManager.HideBuildPanel(); // Скрываем панель построек при выборе здания для создания юнитов
+            buildingManager.HideBuildPanel();
         }
     }
 
     private void UpdateUnitPanel()
     {
-        // Очищаем панель перед добавлением новых кнопок
         foreach (Transform child in unitButtonPanel)
         {
             Destroy(child.gameObject);
         }
 
-        // Получаем доступные для создания юниты
         GameObject[] availableUnits = unitCreation.GetAvailableUnits();
         float panelWidth = unitButtonPanel.GetComponent<RectTransform>().rect.width;
         float buttonWidth = unitButtonPrefab.GetComponent<RectTransform>().rect.width;
         float spacing = (panelWidth - (availableUnits.Length * buttonWidth)) / (availableUnits.Length + 1);
 
-        // Проходимся по каждому доступному юниту
         for (int i = 0; i < availableUnits.Length; i++)
         {
             GameObject unit = availableUnits[i];
             Button button = Instantiate(unitButtonPrefab, unitButtonPanel);
             int index = i;
 
-            // Присоединяем событие к кнопке
             button.onClick.AddListener(() => CreateUnit(index));
 
-            // Устанавливаем изображение юнита на кнопку
             Image buttonImage = button.GetComponent<Image>();
             SpriteRenderer unitSpriteRenderer = unit.GetComponent<SpriteRenderer>();
             if (unitSpriteRenderer != null)
@@ -62,49 +57,41 @@ public class UnitPanelManager : MonoBehaviour
                 buttonImage.sprite = unitSpriteRenderer.sprite;
             }
 
-            // Получаем стоимость юнита
             UnitCost cost = unit.GetComponent<UnitCost>();
 
-            // Создаем новый объект для отображения иконки и стоимости
             GameObject costPanel = new GameObject("CostPanel");
-            costPanel.transform.SetParent(button.transform, false); // Устанавливаем как дочерний элемент кнопки
+            costPanel.transform.SetParent(button.transform, false); 
 
-            // Создаем иконку золота
             GameObject goldIconObject = new GameObject("GoldIcon");
             Image goldIcon = goldIconObject.AddComponent<Image>();
             goldIcon.sprite = goldIconSprite;
             goldIconObject.transform.SetParent(costPanel.transform, false);
 
-            // Создаем текст для стоимости
             GameObject goldCostTextObject = new GameObject("GoldCostText");
             TextMeshProUGUI goldCostText = goldCostTextObject.AddComponent<TextMeshProUGUI>();
             goldCostText.text = cost != null ? cost.gold.ToString() : "0";
-            goldCostText.fontSize = 20; // Задаем размер шрифта
+            goldCostText.fontSize = 20; 
             goldCostText.font = fontAsset;
             goldCostText.alignment = TextAlignmentOptions.Center;
             goldCostTextObject.transform.SetParent(costPanel.transform, false);
 
-            // Настраиваем размеры иконки и текста
             RectTransform iconRectTransform = goldIconObject.GetComponent<RectTransform>();
-            iconRectTransform.sizeDelta = new Vector2(30, 30); // Размер иконки
+            iconRectTransform.sizeDelta = new Vector2(30, 30); 
 
             RectTransform textRectTransform = goldCostTextObject.GetComponent<RectTransform>();
-            textRectTransform.sizeDelta = new Vector2(50, 30); // Размер текста
-            textRectTransform.anchoredPosition = new Vector2(30, 0); // Расположение текста рядом с иконкой
+            textRectTransform.sizeDelta = new Vector2(50, 30);
+            textRectTransform.anchoredPosition = new Vector2(30, 0); 
 
-            // Настраиваем положение панели стоимости относительно кнопки
             RectTransform costPanelRectTransform = costPanel.AddComponent<RectTransform>();
-            costPanelRectTransform.sizeDelta = new Vector2(100, 30); // Размер панели стоимости
-            costPanelRectTransform.anchoredPosition = new Vector2(-80, 0); // Слева от кнопки
+            costPanelRectTransform.sizeDelta = new Vector2(100, 30); 
+            costPanelRectTransform.anchoredPosition = new Vector2(-80, 0); 
 
-            // Проверяем, может ли игрок позволить себе юнита
             PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
             if (cost != null && !currentPlayerResourceManager.CanAfford(0, 0, cost.gold))
             {
-                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); // Серый цвет, если ресурсов недостаточно
+                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
             }
 
-            // Позиционирование кнопок на панели
             float xPos = 30 + spacing * (i + 1) + buttonWidth * i;
             button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
         }
@@ -122,10 +109,10 @@ public class UnitPanelManager : MonoBehaviour
 
             if (goldSpent)
             {
-                unitCreation.CreateUnit(index, selectedBuildingInstance.gameObject); // Передаем buildingInstance при создании юнита
-                selectedBuildingInstance.ProduceUnit(); // Устанавливаем флаг производства юнита
-                unitButtonPanel.gameObject.SetActive(false); // Скрываем панель юнитов после создания юнита
-                buildingManager.ShowBuildPanel(); // Вернуться на панель построек после создания юнита
+                unitCreation.CreateUnit(index, selectedBuildingInstance.gameObject); 
+                selectedBuildingInstance.ProduceUnit();
+                unitButtonPanel.gameObject.SetActive(false);
+                buildingManager.ShowBuildPanel();
             }
         }
         else
@@ -138,8 +125,8 @@ public class UnitPanelManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            unitButtonPanel.gameObject.SetActive(false); // Скрываем панель юнитов при нажатии Esc
-            buildingManager.ShowBuildPanel(); // Вернуться на панель построек при нажатии Esc
+            unitButtonPanel.gameObject.SetActive(false); 
+            buildingManager.ShowBuildPanel(); 
         }
     }
 }

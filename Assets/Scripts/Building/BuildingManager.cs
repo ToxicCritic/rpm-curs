@@ -129,71 +129,63 @@ public class BuildingManager : MonoBehaviour
             float xPos = 30 + spacing * (i + 1) + buttonWidth * i;
             button.GetComponent<RectTransform>().anchoredPosition = new Vector2(xPos, 0);
 
-            // Получаем компонент BuildingCost для отображения стоимости
             BuildingCost cost = building.GetComponent<BuildingCost>();
             if (cost != null)
             {
-                // Создаем объект для текста стоимости дерева
                 GameObject woodCostTextObject = new GameObject("WoodCostText");
                 woodCostTextObject.transform.SetParent(button.transform);
 
                 TextMeshProUGUI woodCostText = woodCostTextObject.AddComponent<TextMeshProUGUI>();
-                woodCostText.text = cost.wood.ToString();  // Стоимость дерева
-                woodCostText.font = customTMPFont;  // Устанавливаем кастомный TMP шрифт
+                woodCostText.text = cost.wood.ToString();
+                woodCostText.font = customTMPFont;  
                 woodCostText.fontSize = 20;
-                woodCostText.color = Color.green;  // Задаем цвет текста для дерева
+                woodCostText.color = Color.green;  
                 woodCostText.alignment = TextAlignmentOptions.Center;
 
-                // Позиционирование текста под кнопкой здания
                 RectTransform woodTextRectTransform = woodCostTextObject.GetComponent<RectTransform>();
-                woodTextRectTransform.sizeDelta = new Vector2(100, 30); // Размер текста
-                woodTextRectTransform.anchoredPosition = new Vector2(-45, 10); // Позиционирование
+                woodTextRectTransform.sizeDelta = new Vector2(100, 30); 
+                woodTextRectTransform.anchoredPosition = new Vector2(-45, 10); 
 
                 // Создаем объект для иконки дерева
                 GameObject woodIconObject = new GameObject("WoodIcon");
                 woodIconObject.transform.SetParent(button.transform);
 
                 Image woodIconImage = woodIconObject.AddComponent<Image>();
-                woodIconImage.sprite = woodIcon;  // Иконка дерева
+                woodIconImage.sprite = woodIcon; 
 
-                // Позиционирование иконки дерева рядом с текстом
                 RectTransform woodIconRectTransform = woodIconObject.GetComponent<RectTransform>();
-                woodIconRectTransform.sizeDelta = new Vector2(24, 24);  // Размер иконки
-                woodIconRectTransform.anchoredPosition = new Vector2(-75, 10);  // Позиционирование
+                woodIconRectTransform.sizeDelta = new Vector2(24, 24);  
+                woodIconRectTransform.anchoredPosition = new Vector2(-75, 10); 
 
-                // Создаем объект для текста стоимости камня
                 GameObject stoneCostTextObject = new GameObject("StoneCostText");
                 stoneCostTextObject.transform.SetParent(button.transform);
 
                 TextMeshProUGUI stoneCostText = stoneCostTextObject.AddComponent<TextMeshProUGUI>();
-                stoneCostText.text = cost.stone.ToString();  // Стоимость камня
-                stoneCostText.font = customTMPFont;  // Устанавливаем кастомный TMP шрифт
+                stoneCostText.text = cost.stone.ToString(); 
+                stoneCostText.font = customTMPFont; 
                 stoneCostText.fontSize = 20;
-                stoneCostText.color = Color.gray;  // Задаем цвет текста для камня
+                stoneCostText.color = Color.gray;  
                 stoneCostText.alignment = TextAlignmentOptions.Center;
 
-                // Позиционирование текста камня
                 RectTransform stoneTextRectTransform = stoneCostTextObject.GetComponent<RectTransform>();
-                stoneTextRectTransform.sizeDelta = new Vector2(100, 30);  // Размер текста
-                stoneTextRectTransform.anchoredPosition = new Vector2(-45, -15);  // Позиционирование
+                stoneTextRectTransform.sizeDelta = new Vector2(100, 30); 
+                stoneTextRectTransform.anchoredPosition = new Vector2(-45, -15);  
 
-                // Создаем объект для иконки камня
                 GameObject stoneIconObject = new GameObject("StoneIcon");
                 stoneIconObject.transform.SetParent(button.transform);
 
                 Image stoneIconImage = stoneIconObject.AddComponent<Image>();
-                stoneIconImage.sprite = stoneIcon;  // Иконка камня
+                stoneIconImage.sprite = stoneIcon;  
 
-                // Позиционирование иконки камня рядом с текстом
                 RectTransform stoneIconRectTransform = stoneIconObject.GetComponent<RectTransform>();
-                stoneIconRectTransform.sizeDelta = new Vector2(24, 24);  // Размер иконки
-                stoneIconRectTransform.anchoredPosition = new Vector2(-75, -15);  // Позиционирование
+                stoneIconRectTransform.sizeDelta = new Vector2(24, 24); 
+                stoneIconRectTransform.anchoredPosition = new Vector2(-75, -15);  
             }
 
             PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
             if (cost != null && !currentPlayerResourceManager.CanAfford(cost.wood, cost.stone, 0))
             {
-                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); // Серый цвет, если ресурсов недостаточно
+                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); 
             }
         }
     }
@@ -206,7 +198,6 @@ public class BuildingManager : MonoBehaviour
         Vector3Int gridPosition = Vector3Int.FloorToInt(mousePosition);
         gridPosition.z = 0;
 
-        // Обновление позиции хайлайтера (подсветки)
         if (alwaysOnHighlighterInstance.activeSelf)
         {
             Vector3 alwaysOnHighlighterPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.2f);
@@ -219,7 +210,6 @@ public class BuildingManager : MonoBehaviour
             tileHighlighterInstance.transform.position = placePosition;
         }
 
-        // Проверка на возможность установки здания
         if (selectedBuildingPrefab != null && Input.GetMouseButtonDown(0))
         {
             if (CanPlaceBuilding(gridPosition) && IsWithinMapBounds(gridPosition) && IsInPlayerQuarter(gridPosition))
@@ -237,15 +227,12 @@ public class BuildingManager : MonoBehaviour
                         {
                             Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
 
-                            // Инстанцируем здание и сохраняем позицию
                             GameObject buildingObject = Instantiate(selectedBuildingPrefab, spawnPosition, Quaternion.identity);
                             Building building = buildingObject.GetComponent<Building>();
 
-                            // Сохраняем позицию здания в его поля positionX и positionY
                             building.positionX = spawnPosition.x;
                             building.positionY = spawnPosition.y;
 
-                            // Обнуляем выбор и скрываем хайлайтеры
                             selectedBuildingPrefab = null;
                             tileHighlighterInstance.SetActive(false);
                             alwaysOnHighlighterInstance.SetActive(true);
@@ -271,26 +258,22 @@ public class BuildingManager : MonoBehaviour
 
     public bool CreateBuilding(int buildingIndex, Vector3Int gridPosition)
     {
-        // Проверка на возможность установки здания
         if (CanPlaceBuilding(gridPosition) && IsWithinMapBounds(gridPosition) && IsInPlayerQuarter(gridPosition))
         {
-            // Получаем префаб здания
             GameObject buildingPrefab = currentBuildings[buildingIndex];
             BuildingCost cost = buildingPrefab.GetComponent<BuildingCost>();
             PlayerResourceManager currentPlayerResourceManager = TurnManager.Instance.GetCurrentPlayerResourceManager();
 
 
-            // Создаем здание
             Vector3 spawnPosition = new Vector3(gridPosition.x + 0.5f, gridPosition.y + 0.5f, -0.1f);
             GameObject buildingObject = Instantiate(buildingPrefab, spawnPosition, Quaternion.identity);
             Building building = buildingObject.GetComponent<Building>();
             building.positionX = spawnPosition.x;
             building.positionY = spawnPosition.y;
 
-            // Регистрируем здание
             RegisterBuilding(building);
 
-            return true; // Успешное создание здания
+            return true; 
 
         }
         else
@@ -298,7 +281,7 @@ public class BuildingManager : MonoBehaviour
             Debug.Log("Cannot place building.");
         }
 
-        return false; // Ошибка создания здания
+        return false; 
     }
 
 
@@ -379,7 +362,7 @@ public class BuildingManager : MonoBehaviour
         if (building.buildingType == Building.BuildingType.Fortress)
         {
             TurnManager.Instance.DeactivatePlayer(building.playerIndex);
-            DestroyPlayerBuildingsAndUnits(building.playerIndex); // Уничтожаем здания и юниты игрока
+            DestroyPlayerBuildingsAndUnits(building.playerIndex);
         }
     }
 
@@ -461,15 +444,12 @@ public class BuildingManager : MonoBehaviour
             float positionX = float.Parse(data[6]) + 0.5f;
             float positionY = float.Parse(data[7]) + 0.5f;
 
-            // Переключаемся на нужного игрока
             SetPlayer(playerIndex);
 
-            // Проверяем, является ли здание крепостью
             if (buildingType == BuildingType.Fortress)
             {
-                // Если это крепость, вызываем метод для ее создания
                 Vector3 fortressPosition = new Vector3(positionX, positionY, -0.2f);
-                GameObject fortressPrefab = GetFortressPrefab(playerIndex);
+                GameObject fortressPrefab = GetFortressPrefab(playerIndex - 1);
                 GameObject fortress = Instantiate(fortressPrefab, fortressPosition, Quaternion.identity);
                 fortress.name = $"Player{playerIndex}Fortress";
                 fortress.transform.parent = this.transform;
@@ -484,20 +464,17 @@ public class BuildingManager : MonoBehaviour
                     fortressBuilding.buildingType = BuildingType.Fortress;
                     fortressBuilding.positionX = positionX;
                     fortressBuilding.positionY = positionY;
-                    // Регистрация крепости в менеджере зданий
                     RegisterBuilding(fortressBuilding);
                 }
             }
             else
             {
-                // Обычные здания: используем метод CreateBuilding для создания
                 Vector3Int gridPosition = new Vector3Int((int)positionX, (int)positionY, 0);
                 bool success = CreateBuilding((int)buildingType, gridPosition);
 
                 if (success)
                 {
-                    // Получаем созданное здание и устанавливаем его параметры
-                    Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; // Последнее созданное здание
+                    Building createdBuilding = playerBuildings[playerBuildings.Count - 1]; 
                     createdBuilding.health = health;
                     createdBuilding.maxHealth = maxHealth;
                     createdBuilding.hasProducedUnit = hasProducedUnit;
@@ -515,13 +492,12 @@ public class BuildingManager : MonoBehaviour
 
     GameObject GetFortressPrefab(int playerIndex)
     {
-        // В зависимости от индекса игрока, возвращаем нужный префаб крепости
         switch (playerIndex)
         {
-            case 0: return orcFortressPrefab;  // Орки
-            case 1: return humanFortressPrefab;  // Люди
-            case 2: return elfFortressPrefab;  // Эльфы
-            case 3: return undeadFortressPrefab;  // Нежить
+            case 0: return orcFortressPrefab; 
+            case 1: return humanFortressPrefab; 
+            case 3: return elfFortressPrefab;  
+            case 2: return undeadFortressPrefab;  
             default:
                 Debug.LogError($"Неизвестная раса для игрока с индексом {playerIndex}.");
                 return null;

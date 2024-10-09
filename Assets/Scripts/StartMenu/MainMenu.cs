@@ -12,7 +12,6 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        // Проверяем, существует ли файл сохранения
         if (File.Exists(saveFile))
         {
             continueButton.interactable = true;
@@ -20,20 +19,18 @@ public class MainMenu : MonoBehaviour
         }
         else
         {
-            continueButton.interactable = false; // Отключаем кнопку "Продолжить", если сохранения нет
+            continueButton.interactable = false; 
         }
     }
 
     public void StartNewGame()
     {
-        // Удаляем сохраненный прогресс (если есть)
         if (File.Exists(saveFile))
         {
             File.Delete(saveFile);
             Debug.Log("Existing save file deleted. Starting new game.");
         }
 
-        // Загружаем игровую сцену
         SceneManager.LoadScene("RaceSelector");
     }
 
@@ -41,12 +38,7 @@ public class MainMenu : MonoBehaviour
     {
         if (File.Exists(saveFile))
         {
-            // Подписываемся на событие загрузки сцены
-            //SceneManager.sceneLoaded += OnGameSceneLoaded;
-
-            // Загружаем игровую сцену
              SceneManager.LoadScene("GameScene");
-
         }
         else
         {

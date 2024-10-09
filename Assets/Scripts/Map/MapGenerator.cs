@@ -78,8 +78,8 @@ public class MapGenerator : MonoBehaviour
         {
         new Vector3(1.5f, 1.5f, -0.2f),
         new Vector3(1.5f, mapHeight - 2.5f, -0.2f),
+        new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.2f),
         new Vector3(mapWidth - 2.5f, 1.5f, -0.2f),
-        new Vector3(mapWidth - 2.5f, mapHeight - 2.5f, -0.2f)
         };
 
         for (int i = 0; i < 4; i++)
@@ -93,7 +93,7 @@ public class MapGenerator : MonoBehaviour
             Building building = fortress.GetComponent<Building>();
             building.positionX = positions[i].x;
             building.positionY = positions[i].y;
-            building.playerIndex = i;
+            building.playerIndex = i + 1;
             if (building != null)
             {
                 FindObjectOfType<BuildingManager>().RegisterBuilding(building);
@@ -110,8 +110,8 @@ public class MapGenerator : MonoBehaviour
         {
             case 0: return orcFortressPrefab;
             case 1: return humanFortressPrefab;
-            case 2: return elfFortressPrefab;
-            case 3: return undeadFortressPrefab;
+            case 3: return elfFortressPrefab;
+            case 2: return undeadFortressPrefab;
             default: return null;
         }
     }
@@ -128,7 +128,6 @@ public class MapGenerator : MonoBehaviour
 
                 if (tile != null)
                 {
-                    // Устанавливаем крепость как дочерний объект тайла
                     fortress.transform.parent = tile.transform;
 
                     Debug.Log($"Fortress placed on tile at {gridPosition.x},{gridPosition.y}.");
@@ -144,29 +143,25 @@ public class MapGenerator : MonoBehaviour
 
     bool IsFortressOccupying(float x, float y)
     {
-        // Определяем углы карты, где располагаются крепости
         List<Vector3> fortressPositions = new List<Vector3>
         {
         new Vector3(1.5f, 0.5f, -0.1f),
         new Vector3(1.5f, 24.5f, -0.1f),
         new Vector3(25.5f, 0.5f, -0.1f),
-        new Vector3(25.5f, 24.5f, -0.1f)   // Правая верхняя крепость
+        new Vector3(25.5f, 24.5f, -0.1f)  
         };
 
-        // Проверяем, находится ли клетка в одном из углов, зарезервированных для крепостей
         foreach (var fortressPosition in fortressPositions)
         {
-            // Проверяем каждую из 4 клеток, которые занимает крепость
-            if ((x == fortressPosition.x && y == fortressPosition.y) ||               // Центр крепости
-                (x == fortressPosition.x - 1f && y == fortressPosition.y) ||           // Правая клетка
-                (x == fortressPosition.x - 1f && y == fortressPosition.y + 1f) ||           // Верхняя клетка
-                (x == fortressPosition.x  && y == fortressPosition.y + 1f))         // Верхняя правая клетка
+            if ((x == fortressPosition.x && y == fortressPosition.y) ||              
+                (x == fortressPosition.x - 1f && y == fortressPosition.y) ||          
+                (x == fortressPosition.x - 1f && y == fortressPosition.y + 1f) ||           
+                (x == fortressPosition.x  && y == fortressPosition.y + 1f))       
             {
                 return true;
             }
         }
 
-        // Проверяем занятость этой клетки другим объектом (если она не является частью крепости)
         return IsOccupied((int)x, (int)y);
     }
 
@@ -180,7 +175,6 @@ public class MapGenerator : MonoBehaviour
                 {
                     Vector3 position = new Vector3(x + 0.5f, y + 0.5f, -0.1f);
 
-                    // Проверяем, не является ли эта клетка частью крепости или занятой другим объектом
                     if (!IsFortressOccupying(x + 0.5f, y + 0.5f))
                     {
                         if (Random.value < treeProbability)
@@ -207,18 +201,15 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                // Проверяем, что на клетке есть объект
                 if (gridObjects[x, y] != null && gridObjects[x, y].transform.childCount > 0)
                 {
-                    // Получаем дочерний объект ресурса (если он существует)
                     Transform resourceTransform = gridObjects[x, y].transform.GetChild(0);
 
                     if (resourceTransform != null)
                     {
-                        string resourceType = resourceTransform.gameObject.tag; // Получаем тег ресурса
-                        string race = ""; // Определяем принадлежность к расе
+                        string resourceType = resourceTransform.gameObject.tag;
+                        string race = ""; 
 
-                        // Определяем принадлежность ресурса к расе на основе тега
                         if (resourceType.Contains("orc"))
                             race = "Orc";
                         else if (resourceType.Contains("elf"))
@@ -228,7 +219,6 @@ public class MapGenerator : MonoBehaviour
                         else if (resourceType.Contains("undead"))
                             race = "Undead";
 
-                        // Сохраняем информацию о ресурсе в файл
                         writer.WriteLine($"Resource,{resourceType},{race},{x},{y}");
                     }
                 }
@@ -239,15 +229,14 @@ public class MapGenerator : MonoBehaviour
 
     public void LoadResourcesFromFile(string[] data)
     {
-        string resourceType = data[1]; // Тип ресурса (Tree или Rock)
-        string race = data[2];         // Принадлежность к расе (Orc, Elf, Human, Undead)
-        int x = int.Parse(data[3]);    // Координаты x
-        int y = int.Parse(data[4]);    // Координаты y
+        string resourceType = data[1]; 
+        string race = data[2];        
+        int x = int.Parse(data[3]);   
+        int y = int.Parse(data[4]);   
 
         Vector3 position = new Vector3(x + 0.5f, y + 0.5f, -0.1f);
         GameObject prefab = null;
 
-        // Определяем префаб в зависимости от расы и типа ресурса
         if (race == "Orc")
         {
             prefab = (resourceType == "orcTree") ? orcTree : orcRock;
@@ -265,11 +254,10 @@ public class MapGenerator : MonoBehaviour
             prefab = (resourceType == "undeadTree") ? undeadTree : undeadRock;
         }
 
-        // Создаем объект ресурса на карте
         if (prefab != null)
         {
             GameObject resource = Instantiate(prefab, position, Quaternion.identity);
-            resource.transform.parent = gridObjects[x, y].transform; // Привязываем к клетке
+            resource.transform.parent = gridObjects[x, y].transform; 
         }
     }
 
@@ -279,13 +267,10 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                // Проверяем, что на клетке есть объект
                 if (gridObjects[x, y] != null)
                 {
-                    // Определяем тип тайла и его индекс в массиве
                     string tileType = GetTileTypeAndIndex(x, y, out int tileIndex);
 
-                    // Сохраняем информацию о тайле, включая его индекс
                     writer.WriteLine($"Tile,{tileType},{tileIndex},{x},{y}");
                 }
             }
@@ -296,14 +281,13 @@ public class MapGenerator : MonoBehaviour
     {
         GameObject tile = gridObjects[x, y];
 
-        // Проверяем, к какому типу относится тайл (по расе и типу тайла)
         if (IsTileFromSet(tile, orcTiles, out tileIndex)) return "OrcTile";
         if (IsTileFromSet(tile, elfTiles, out tileIndex)) return "ElfTile";
         if (IsTileFromSet(tile, humanTiles, out tileIndex)) return "HumanTile";
         if (IsTileFromSet(tile, undeadTiles, out tileIndex)) return "UndeadTile";
 
         tileIndex = -1;
-        return "UnknownTile"; // На случай, если тайл не будет найден в известных наборах
+        return "UnknownTile";
     }
 
     private bool IsTileFromSet(GameObject tile, GameObject[] tileSet, out int tileIndex)
@@ -322,15 +306,14 @@ public class MapGenerator : MonoBehaviour
 
     public void LoadTilesFromFile(string[] data)
     {
-        string tileType = data[1];  // Тип тайла (OrcTile, ElfTile, HumanTile, UndeadTile)
-        int tileIndex = int.Parse(data[2]); // Индекс тайла в массиве
-        int x = int.Parse(data[3]);         // Координаты x
-        int y = int.Parse(data[4]);         // Координаты y
+        string tileType = data[1];  
+        int tileIndex = int.Parse(data[2]); 
+        int x = int.Parse(data[3]);      
+        int y = int.Parse(data[4]);      
 
         Vector3 position = new Vector3(x + 0.5f, y + 0.5f, 0);
         GameObject tilePrefab = null;
 
-        // Определяем префаб в зависимости от типа тайла и его индекса
         switch (tileType)
         {
             case "OrcTile":
@@ -350,8 +333,8 @@ public class MapGenerator : MonoBehaviour
         if (tilePrefab != null)
         {
             GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity);
-            tile.transform.parent = this.transform; // Привязываем к MapGenerator
-            gridObjects[x, y] = tile; // Записываем тайл в сетку
+            tile.transform.parent = this.transform;
+            gridObjects[x, y] = tile; 
         }
     }
 

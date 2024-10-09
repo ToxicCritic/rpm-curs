@@ -10,8 +10,7 @@ public class SaveManager : MonoBehaviour
     private MapGenerator mapGenerator;
     private GameResourceManager gameResourceManager;
     private BuildingManager buildingManager;
-    // Обновляем для поддержки 4 UnitManager для разных рас
-    public UnitManager[] unitManagers = new UnitManager[4];  // По индексу игрока
+    public UnitManager[] unitManagers = new UnitManager[4];
     private TurnManager turnManager;
 
     public static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
@@ -19,19 +18,17 @@ public class SaveManager : MonoBehaviour
 
     private void Awake()
     {
-        // Проверка на наличие уже существующего экземпляра
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);  // Сохраняем объект между сценами
+            DontDestroyOnLoad(gameObject); 
         }
         else
         {
-            Destroy(gameObject);  // Уничтожаем дубликат, если уже существует экземпляр
+            Destroy(gameObject); 
         }
     }
 
-    // Метод для обновления ссылок на менеджеры
     public void InitializeManagers()
     {
         mapGenerator = FindObjectOfType<MapGenerator>();
@@ -39,7 +36,6 @@ public class SaveManager : MonoBehaviour
         buildingManager = FindObjectOfType<BuildingManager>();
         turnManager = FindObjectOfType<TurnManager>();
 
-        // Инициализация всех UnitManager для разных игроков (рас)
         for (int i = 0; i < 4; i++)
         {
             unitManagers[i] = GameObject.Find($"UnitManager_Player{i}")?.GetComponent<UnitManager>();
@@ -57,17 +53,14 @@ public class SaveManager : MonoBehaviour
 
     private void CreateSaveFileIfNotExists()
     {
-        // Проверяем, существует ли директория
         if (!Directory.Exists(saveDirectory))
         {
-            Directory.CreateDirectory(saveDirectory); // Создаем директорию, если ее нет
+            Directory.CreateDirectory(saveDirectory); 
         }
 
-        // Проверяем, существует ли файл сохранения
         if (!File.Exists(saveFilePath))
         {
-            // Создаем файл, если его нет
-            File.Create(saveFilePath).Close(); // Закрываем поток после создания файла
+            File.Create(saveFilePath).Close(); 
             Debug.Log("Файл сохранения создан: " + saveFilePath);
         }
     }
@@ -78,26 +71,22 @@ public class SaveManager : MonoBehaviour
 
         using (StreamWriter writer = new StreamWriter(saveFilePath))
         {          
-            // Сохранение карты (тайлы и ресурсы)
             if (mapGenerator != null)
             {
                 mapGenerator.SaveTilesToFile(writer);
                 mapGenerator.SaveResourcesToFile(writer);
             }
 
-            // Сохранение всех ресурсов
             if (gameResourceManager != null)
             {
                 gameResourceManager.SavePlayerResources(writer);
             }
 
-            // Сохранение зданий
             if (buildingManager != null)
             {
                 buildingManager.SaveBuildingsToFile(writer);
             }
 
-            // Сохранение юнитов для каждого UnitManager
             foreach (var unitManager in unitManagers)
             {
                 if (unitManager != null)
@@ -165,7 +154,6 @@ public class SaveManager : MonoBehaviour
                         }
                         break;
                     case "UnitData":
-                        // Определяем, к какому игроку относится юнит
                         int playerIndex = int.Parse(data[2]);
                         if (playerIndex >= 0 && playerIndex < unitManagers.Length && unitManagers[playerIndex] != null)
                         {
