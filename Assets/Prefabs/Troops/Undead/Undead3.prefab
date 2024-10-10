@@ -145,7 +145,7 @@ MonoBehaviour:
   unitIndex: 3
   health: 80
   maxHealth: 80
-  attackPower: 20
+  attackPower: 15
   attackRange: 1
   moveRange: 15
   hasMoved: 0

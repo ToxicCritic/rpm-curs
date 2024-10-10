@@ -46,6 +46,10 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    public void OpenControlsTab()
+    {
+        SceneManager.LoadScene("ControlsScene");
+    }
     public void QuitGame()
     {
         Application.Quit();

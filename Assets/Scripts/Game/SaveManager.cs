@@ -113,6 +113,7 @@ public class SaveManager : MonoBehaviour
         }
 
         InitializeManagers();
+        turnManager.activePlayers.Clear();
 
         using (StreamReader reader = new StreamReader(saveFilePath))
         {
@@ -124,6 +125,12 @@ public class SaveManager : MonoBehaviour
                 switch (data[0])
                 {
                     case "TurnData":
+                        if (turnManager != null)
+                        {
+                            turnManager.LoadTurnFromFile(data);
+                        }
+                        break;
+                    case "ActivePlayer":
                         if (turnManager != null)
                         {
                             turnManager.LoadTurnFromFile(data);

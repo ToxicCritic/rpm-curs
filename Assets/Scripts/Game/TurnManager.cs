@@ -24,7 +24,7 @@ public class TurnManager : MonoBehaviour
     public int currentTurnIndex = 1; 
     private string[] playerNames = { "Орки", "Люди", "Нежить", "Эльфы" };
 
-    public HashSet<int> activePlayers;
+    public HashSet<int> activePlayers = new HashSet<int> { 1, 2, 3, 4 };
 
     private static readonly string saveDirectory = Path.Combine(Application.dataPath, "Saves");
     private static readonly string saveFile = Path.Combine(saveDirectory, "game_save.csv");
@@ -39,7 +39,6 @@ public class TurnManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        activePlayers = new HashSet<int> { 1, 2, 3, 4 };
 
         if (!Directory.Exists(saveDirectory))
         {
@@ -191,6 +190,11 @@ public class TurnManager : MonoBehaviour
     public void SaveTurnToFile(StreamWriter writer)
     {
         writer.WriteLine($"TurnData,{currentTurnIndex}");
+        foreach (int player in activePlayers)
+        {
+            writer.WriteLine($"ActivePlayer,{player}");
+        }
+
     }
 
     public void LoadTurnFromFile(string[] data)
@@ -199,6 +203,10 @@ public class TurnManager : MonoBehaviour
         {
             PlayerPrefs.SetInt("SelectedRace", int.Parse(data[1]));
             Debug.Log($"Ход игрока загружен: {currentTurnIndex}");
+        }
+        else if (data[0] == "ActivePlayer")
+        {
+            activePlayers.Add(int.Parse(data[1]));
         }
     }
 }

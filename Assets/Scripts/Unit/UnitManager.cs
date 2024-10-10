@@ -72,6 +72,7 @@ public class UnitManager : MonoBehaviour
                 {
                     SelectedUnit.SetTarget(hitUnit.transform);
                     SelectedUnit.Attack();
+                    DeselectUnit();
                 }
             }
             else if (hitCollider != null && SelectedUnit != null && SelectedUnit.unitIndex == 1)
@@ -274,6 +275,7 @@ public class UnitManager : MonoBehaviour
         ClearMoveRangeIndicators();
         ClearAttackRangeIndicators();
         DeselectUnit();
+        DeselectTower();
     }
 
     public void SaveUnitsToFile(StreamWriter writer)
